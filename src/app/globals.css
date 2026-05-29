@@ -1159,8 +1159,9 @@ a {
   border-radius: 8px;
   overflow: hidden;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
+  align-items: stretch;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(217, 187, 151, 0.03);
   width: 100%;
