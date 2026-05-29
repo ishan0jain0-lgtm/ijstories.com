@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
-import { Syne, Outfit } from "next/font/google";
+import { Syne, Outfit, Geist } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const syne = Syne({
   variable: "--font-syne",
@@ -52,7 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${syne.variable} ${outfit.variable}`}>
+    <html lang="en" className={cn(syne.variable, outfit.variable, "font-sans", geist.variable)}>
       <body className="antialiased">{children}</body>
     </html>
   );
