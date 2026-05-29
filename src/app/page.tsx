@@ -506,7 +506,7 @@ export default function Home() {
   
   const studioRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
-    target: studioRef,
+    target: mounted ? studioRef : undefined,
     offset: ["start end", "end start"]
   });
 
