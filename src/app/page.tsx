@@ -208,12 +208,22 @@ export default function Home() {
         <div className="container flex-row-center-between">
           <a 
             href="#" 
-            className="font-syne hover:scale-105 transition-transform duration-300"
-            style={{ fontSize: "1.5rem", fontWeight: 800, letterSpacing: "-0.04em", color: "var(--cream)" }}
+            className="hover:scale-102 transition-transform duration-300"
+            style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
             onMouseEnter={() => setCursorType("hover")}
             onMouseLeave={() => setCursorType("default")}
           >
-            I.J_Stories<span className="text-orange" style={{ color: "var(--orange)" }}>.</span>
+            <div style={{ position: "relative", width: "1.8rem", height: "2.16rem", borderRadius: "4px", overflow: "hidden", border: "1px solid rgba(217, 187, 151, 0.15)" }}>
+              <Image 
+                src="/logo.jpg" 
+                alt="I.J_Stories Official Monogram" 
+                fill 
+                style={{ objectFit: "cover" }}
+              />
+            </div>
+            <span className="font-syne" style={{ fontSize: "1.35rem", fontWeight: 800, letterSpacing: "-0.04em", color: "var(--cream)" }}>
+              I.J_Stories
+            </span>
           </a>
 
           {/* Desktop Nav Links */}
@@ -500,10 +510,17 @@ export default function Home() {
                 </h2>
               </div>
               
-              <div className="hidden lg:block" style={{ marginTop: "2rem" }}>
-                <div style={{ width: "4rem", height: "1px", backgroundColor: "var(--orange)", marginBottom: "1rem" }} />
-                <p style={{ fontSize: "0.75rem", letterSpacing: "0.05em", fontWeight: 600, opacity: 0.7 }} className="uppercase">
-                  I.J_Stories — From Identity to Influence
+              <div className="hidden lg:block" style={{ marginTop: "3rem" }}>
+                <div style={{ position: "relative", width: "9rem", aspectRatio: "1/1.2", borderRadius: "8px", overflow: "hidden", border: "1px solid rgba(179, 74, 38, 0.25)", boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}>
+                  <Image 
+                    src="/logo.jpg" 
+                    alt="I.J_Stories Brand Seal" 
+                    fill 
+                    style={{ objectFit: "cover" }}
+                  />
+                </div>
+                <p style={{ fontSize: "0.7rem", letterSpacing: "0.1em", fontWeight: 700, opacity: 0.6, marginTop: "1rem" }} className="uppercase font-syne">
+                  Official Brand Seal // Established 2026
                 </p>
               </div>
             </div>
@@ -988,6 +1005,14 @@ export default function Home() {
           <div className="footer-grid-layout">
             
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div style={{ position: "relative", width: "3.2rem", aspectRatio: "1/1.2", borderRadius: "6px", overflow: "hidden", border: "1px solid rgba(217, 187, 151, 0.1)" }}>
+                <Image 
+                  src="/logo.jpg" 
+                  alt="I.J_Stories Official Monogram" 
+                  fill 
+                  style={{ objectFit: "cover" }}
+                />
+              </div>
               <h4 className="font-syne text-cream" style={{ fontSize: "1.25rem", fontWeight: 700 }}>I.J_Stories</h4>
               <p style={{ fontSize: "0.75rem", lineHeight: 1.5 }}>
                 A multidisciplinary creative ecosystem building modern brands that feel human. Designed for global impact.
