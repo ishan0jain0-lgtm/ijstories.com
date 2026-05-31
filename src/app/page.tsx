@@ -125,7 +125,7 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Dummy cursor setter to safely absorb pointer events without full custom cursor overlays
-  const setCursorType = () => {};
+  const setCursorType = (type: string) => {};
   
   const studioRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
