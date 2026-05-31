@@ -289,28 +289,27 @@ a {
 /* Hero System */
 .hero-content-wrapper {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4rem;
+  justify-content: center;
+  text-align: center;
   width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
 }
 
 @media (max-width: 1024px) {
   .hero-content-wrapper {
-    flex-direction: column-reverse;
     gap: 3rem;
-    text-align: center;
   }
 }
 
 .hero-text-block {
-  flex: 1.2;
+  width: 100%;
 }
 
 .hero-visual-block {
-  flex: 0.8;
-  display: flex;
-  justify-content: center;
-  width: 100%;
+  display: none;
 }
 
 .creative-badge {
@@ -366,6 +365,7 @@ a {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 1.5rem;
 }
 
@@ -1007,6 +1007,16 @@ a {
   overflow: hidden;
 }
 
+.philosophy-section h1,
+.philosophy-section h2,
+.philosophy-section h3,
+.philosophy-section h5,
+.philosophy-section h6,
+.philosophy-section p {
+  color: inherit !important;
+  transition: color 0.3s ease;
+}
+
 @media (max-width: 768px) {
   .philosophy-section {
     padding-top: 8rem !important;
@@ -1267,4 +1277,103 @@ a {
   html {
     @apply font-sans;
   }
+}
+
+/* ==========================================================================
+   TEAM SECTION STYLING (LUXURY PORTRAIT GALLERY)
+   ========================================================================== */
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.team-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(217, 187, 151, 0.05);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.team-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(179, 74, 38, 0.35);
+  box-shadow: 0 15px 35px rgba(179, 74, 38, 0.08);
+}
+
+.team-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+  background-color: #121111;
+}
+
+.team-image {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-card:hover .team-image {
+  transform: scale(1.04);
+}
+
+.team-overlay-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(11, 10, 10, 0.9) 0%, rgba(11, 10, 10, 0.2) 60%, transparent 100%);
+  pointer-events: none;
+  opacity: 0.85;
+  transition: opacity 0.4s ease;
+}
+
+.team-card:hover .team-overlay-glow {
+  opacity: 0.95;
+}
+
+.team-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  z-index: 10;
+  background: linear-gradient(180deg, transparent 0%, rgba(11, 10, 10, 0.98) 100%);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.team-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--cream);
+  letter-spacing: -0.02em;
+}
+
+.team-role {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--orange);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }

@@ -1,21 +1,26 @@
 import type { Metadata } from "next";
-import { Syne, Outfit, Geist } from "next/font/google";
+import { Roboto, Roboto_Condensed, Roboto_Serif } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const syne = Syne({
-  variable: "--font-syne",
+const roboto = Roboto({
+  variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "700", "800"],
+  weight: ["100", "300", "400", "500", "700", "900"],
   display: "swap",
 });
 
-const outfit = Outfit({
+const robotoSerif = Roboto_Serif({
+  variable: "--font-syne",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700", "800"],
+  display: "swap",
+});
+
+const robotoCondensed = Roboto_Condensed({
   variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "700", "800"],
   display: "swap",
 });
 
@@ -55,8 +60,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn(syne.variable, outfit.variable, "font-sans", geist.variable)}>
-      <body className="antialiased">{children}</body>
+    <html lang="en" className={cn(robotoSerif.variable, robotoCondensed.variable, "font-sans", roboto.variable)} suppressHydrationWarning>
+      <body className="antialiased" suppressHydrationWarning>{children}</body>
     </html>
   );
 }

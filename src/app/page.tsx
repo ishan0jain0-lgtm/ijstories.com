@@ -6,13 +6,6 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { 
   ArrowUpRight, 
   Sparkles, 
-  Layers, 
-  Compass, 
-  Camera, 
-  FileText, 
-  Film, 
-  Globe, 
-  Play, 
   Plus, 
   CornerDownRight, 
   Send,
@@ -20,159 +13,14 @@ import {
   Menu,
   X
 } from "lucide-react";
-import { 
-  IconMicrophoneOff, 
-  IconPointerFilled, 
-  IconVolume2,
-  IconCheck
-} from "@tabler/icons-react";
 import Marquee from "react-fast-marquee";
-import { cn } from "@/lib/utils";
 
-// Types
-interface Capability {
-  id: string;
-  num: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-}
 
 // ==========================================
 // BENTO GRID COMPONENTS (LUXURY BRAND EDIT)
 // ==========================================
 
-export const MentorMessage = ({
-  children,
-  delay = 0,
-  avatarSrc = "/logo.jpg",
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  avatarSrc?: string;
-}) => {
-  return (
-    <motion.div
-      className="flex items-start gap-2"
-      initial={{ opacity: 0, y: 15 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay }}
-      viewport={{ once: true }}
-    >
-      <div style={{ position: "relative", width: "1.5rem", height: "1.5rem", borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "1px solid rgba(217, 187, 151, 0.15)" }}>
-        <Image
-          src={avatarSrc}
-          fill
-          alt="Brand Director"
-          style={{ objectFit: "cover" }}
-        />
-      </div>
-      <div className="max-w-[80%] rounded-lg px-3 py-2" style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(217, 187, 151, 0.05)" }}>
-        <div className="text-xs text-cream" style={{ fontSize: "0.75rem", lineHeight: 1.4 }}>
-          {children}
-        </div>
-      </div>
-    </motion.div>
-  );
-};
 
-export const UserMessage = ({
-  children,
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-}) => {
-  return (
-    <motion.div
-      className="flex items-start justify-end gap-2"
-      initial={{ opacity: 0, y: 15 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay }}
-      viewport={{ once: true }}
-    >
-      <div className="max-w-[80%] rounded-lg px-3 py-2" style={{ backgroundColor: "var(--orange)" }}>
-        <div className="text-xs text-cream" style={{ fontSize: "0.75rem", lineHeight: 1.4, color: "#fff" }}>
-          {children}
-        </div>
-      </div>
-      <div style={{ position: "relative", width: "1.5rem", height: "1.5rem", borderRadius: "50%", overflow: "hidden", flexShrink: 0 }}>
-        <Image
-          src="/creative_direction_portrait.png"
-          fill
-          alt="Founder"
-          style={{ objectFit: "cover" }}
-        />
-      </div>
-    </motion.div>
-  );
-};
-
-export const Accountability = () => {
-  const messages = [
-    { type: "mentor", content: "did you refine the brand identity guidelines?" },
-    { type: "user", content: "yes, integrated the terracotta and linen-cream system" },
-    { type: "mentor", content: "perfect, did you test it on physical covers?" },
-    { type: "user", content: "absolutely, printing mockups today." },
-  ];
-
-  return (
-    <div className="flex h-full w-full flex-col rounded-lg p-4" style={{ height: "100%" }}>
-      <div className="flex flex-1 flex-col gap-4 overflow-hidden">
-        {messages.map((message, index) =>
-          message.type === "mentor" ? (
-            <MentorMessage key={index} delay={index * 0.15}>
-              {message.content}
-            </MentorMessage>
-          ) : (
-            <UserMessage key={index} delay={index * 0.15}>
-              {message.content}
-            </UserMessage>
-          ),
-        )}
-      </div>
-    </div>
-  );
-};
-
-export const Encouragement = () => {
-  const messages = [
-    { type: "user", content: "How do we convey the raw grit of our origin story?" },
-    { type: "mentor", content: "Let's capture it through black & white cinema verité." },
-    {
-      type: "mentor",
-      content: "I've scheduled a documentary shoot for next week.",
-      avatarSrc: "/logo.jpg",
-    },
-    {
-      type: "mentor",
-      content: "Focus on the unfiltered truth of the process.",
-      avatarSrc: "/logo.jpg",
-    },
-  ];
-
-  return (
-    <div className="flex h-full w-full flex-col rounded-lg p-4" style={{ height: "100%" }}>
-      <div className="flex flex-1 flex-col gap-4 overflow-hidden">
-        {messages.map((message, index) =>
-          message.type === "mentor" ? (
-            <MentorMessage
-              key={index}
-              delay={index * 0.15}
-              avatarSrc={message.avatarSrc}
-            >
-              {message.content}
-            </MentorMessage>
-          ) : (
-            <UserMessage key={index} delay={index * 0.15}>
-              {message.content}
-            </UserMessage>
-          ),
-        )}
-      </div>
-    </div>
-  );
-};
 
 export const Mentorship = () => {
   const mentors = [
@@ -227,6 +75,7 @@ export const Mentorship = () => {
                 src={mentor.src}
                 alt={mentor.alt}
                 fill
+                sizes="32px"
                 style={{ objectFit: "cover" }}
               />
             </div>
@@ -251,6 +100,7 @@ export const Mentorship = () => {
                 src={mentor.src}
                 alt={mentor.alt}
                 fill
+                sizes="32px"
                 style={{ objectFit: "cover" }}
               />
             </div>
@@ -266,243 +116,16 @@ export const Mentorship = () => {
     </div>
   );
 };
-
-export const PeerGroup = () => {
-  const avatars = [
-    {
-      src: "/creative_direction_portrait.png",
-      alt: "Brandon",
-      x: 10,
-      y: 10,
-      duration: 5,
-    },
-    {
-      src: "/brand_identity_mockup.png",
-      alt: "Manu",
-      x: 150,
-      y: 10,
-      duration: 5.5,
-    },
-    {
-      src: "/abstract_motion_art.png",
-      alt: "Dwayne",
-      x: 10,
-      y: 110,
-      duration: 3,
-    },
-    {
-      src: "/logo.jpg",
-      alt: "Emily",
-      x: 220,
-      y: 30,
-      duration: 5.5,
-    },
-    {
-      src: "/creative_direction_portrait.png",
-      alt: "Manu 2",
-      x: 220,
-      y: 110,
-      duration: 5.8,
-    },
-  ];
-
-  const [currentAvatar, setCurrentAvatar] = useState(avatars[0]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const randomIndex = Math.floor(Math.random() * avatars.length);
-      setCurrentAvatar(avatars[randomIndex]);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="relative flex h-full w-full flex-col rounded-lg p-4" style={{ height: "100%", width: "100%" }}>
-      <div className="relative z-50" style={{ height: "100%" }}>
-        {avatars.map((avatar) => (
-          <motion.div
-            key={avatar.alt}
-            initial={{
-              x: avatar.x,
-              y: avatar.y,
-            }}
-            animate={{
-              x: [avatar.x, avatar.x + 8, avatar.x],
-              y: [avatar.y, avatar.y + 8, avatar.y],
-            }}
-            transition={{
-              duration: avatar.duration,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="absolute"
-            style={{ width: "2.5rem", height: "2.5rem" }}
-          >
-            <div style={{ position: "relative", width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden", border: "2px solid rgba(217, 187, 151, 0.2)" }}>
-              <Image
-                src={avatar.src}
-                alt={avatar.alt}
-                fill
-                style={{ objectFit: "cover" }}
-              />
-            </div>
-          </motion.div>
-        ))}
-      </div>
-      <div className="absolute inset-0 z-40 m-auto flex items-center justify-center rounded-lg shadow-sm" style={{ width: "5rem", height: "6rem", backgroundColor: "rgba(0,0,0,0.4)", border: "1px solid rgba(217, 187, 151, 0.15)" }}>
-        <motion.div
-          key={currentAvatar.alt}
-          initial={{
-            opacity: 0,
-            scale: 0.9,
-          }}
-          animate={{
-            opacity: 1,
-            scale: 1,
-          }}
-          exit={{
-            opacity: 0,
-            scale: 0.9,
-          }}
-          transition={{
-            duration: 0.5,
-            ease: "easeInOut",
-          }}
-          style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", borderRadius: "6px" }}
-        >
-          <Image
-            src={currentAvatar.src}
-            alt={currentAvatar.alt}
-            fill
-            style={{ objectFit: "cover" }}
-          />
-        </motion.div>
-      </div>
-    </div>
-  );
-};
-
-export const DoubtClearing = () => {
-  const avatars = [
-    {
-      title: "First",
-      src: "/creative_direction_portrait.png",
-      icon: <IconVolume2 className="size-3 text-neutral-100" style={{ width: "0.75rem", height: "0.75rem" }} />,
-    },
-    {
-      title: "Second",
-      src: "/brand_identity_mockup.png",
-      icon: <IconMicrophoneOff className="size-3 text-white" style={{ width: "0.75rem", height: "0.75rem" }} />,
-    },
-    {
-      title: "Third",
-      src: "/abstract_motion_art.png",
-      icon: <IconMicrophoneOff className="size-3 text-white" style={{ width: "0.75rem", height: "0.75rem" }} />,
-    },
-  ];
-  return (
-    <div className="relative m-auto rounded-lg p-3" style={{ height: "92%", width: "95%", backgroundColor: "rgba(0, 0, 0, 0.3)", border: "1px solid rgba(217, 187, 151, 0.08)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-      <div className="flex items-center gap-1.5">
-        <div className="rounded-full" style={{ width: "0.5rem", height: "0.5rem", backgroundColor: "#ff5f56" }}></div>
-        <div className="rounded-full" style={{ width: "0.5rem", height: "0.5rem", backgroundColor: "#ffbd2e" }}></div>
-        <div className="rounded-full" style={{ width: "0.5rem", height: "0.5rem", backgroundColor: "#27c93f" }}></div>
-      </div>
-      
-      <div className="relative z-20 flex justify-center" style={{ marginTop: "1rem" }}>
-        <div style={{ position: "relative", width: "4.5rem", height: "4.5rem", borderRadius: "8px", overflow: "hidden", border: "1.5px solid var(--orange)", boxShadow: "0 0 15px rgba(179, 74, 38, 0.3)" }}>
-          <Image
-            src="/logo.jpg"
-            alt="Active Studio Session"
-            fill
-            style={{ objectFit: "cover" }}
-          />
-        </div>
-      </div>
-
-      <div className="relative z-20 flex items-center justify-center gap-3" style={{ marginTop: "1rem" }}>
-        {avatars.map((avatar, idx) => (
-          <div
-            key={avatar.title + idx}
-            className="relative flex flex-col items-center justify-center"
-          >
-            <div style={{ position: "relative", width: "2.2rem", height: "2.2rem", borderRadius: "6px", overflow: "hidden", border: "1px solid rgba(217, 187, 151, 0.15)" }}>
-              <Image
-                src={avatar.src}
-                alt={avatar.title}
-                fill
-                style={{ objectFit: "cover" }}
-              />
-            </div>
-            <div className="absolute bottom-[-2px] left-[-2px] z-50 rounded-full p-0.5" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
-              {avatar.icon}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const Task = ({ text, className, checked }: { text: string; className?: string; checked?: boolean }) => {
-  return (
-    <div
-      className={cn(
-        "absolute w-fit rounded-md p-1.5 text-xs flex items-center gap-1.5",
-        className,
-      )}
-      style={{ 
-        backgroundColor: "rgba(255, 255, 255, 0.02)", 
-        border: checked ? "1px solid rgba(179, 74, 38, 0.3)" : "1px solid rgba(217, 187, 151, 0.08)",
-        color: "var(--cream)",
-        boxShadow: checked ? "0 4px 12px rgba(179, 74, 38, 0.15)" : "none"
-      }}
-    >
-      <div className="rounded flex items-center justify-center" style={{ width: "0.85rem", height: "0.85rem", border: "1px solid rgba(217, 187, 151, 0.3)", backgroundColor: checked ? "var(--orange)" : "transparent" }}>
-        {checked && <IconCheck style={{ width: "0.6rem", height: "0.6rem", color: "#fff" }} />}
-      </div>
-      <span style={{ fontSize: "0.65rem", fontWeight: 500 }}>{text}</span>
-    </div>
-  );
-};
-
-const Line = ({ text }: { text: string }) => {
-  return (
-    <div className="flex h-full flex-col items-center justify-center" style={{ flex: 1 }}>
-      <span className="text-xs" style={{ fontSize: "0.65rem", color: "rgba(217, 187, 151, 0.4)", marginBottom: "0.5rem" }}>
-        {text}
-      </span>
-      <div style={{ width: "1px", height: "100%", backgroundColor: "rgba(217, 187, 151, 0.06)" }}></div>
-    </div>
-  );
-};
-
-export const ProgressTracking = () => {
-  return (
-    <div className="relative w-full h-full" style={{ minHeight: "180px", display: "flex", gap: "1rem", padding: "1rem" }}>
-      <Task text="Brand Strategy Outline" className="top-2 left-2" checked />
-      <Task text="Color Palette Sign-off" className="top-14 left-20" checked />
-      <Task text="Typography Asset Audit" className="top-24 left-2" checked />
-      <Task text="Cinematic Cut Finalized" className="top-36 left-20" />
-      
-      <Line text="M" />
-      <Line text="T" />
-      <Line text="W" />
-      <Line text="T" />
-      <Line text="F" />
-    </div>
-  );
-};
+;
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
-  const [hoveredCapability, setHoveredCapability] = useState<string | null>(null);
   const [activeNote, setActiveNote] = useState<number>(0);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  // Custom Cursor state
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [cursorType, setCursorType] = useState<"default" | "hover" | "view" | "drag">("default");
+  // Dummy cursor setter to safely absorb pointer events without full custom cursor overlays
+  const setCursorType = () => {};
   
   const studioRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -524,121 +147,68 @@ export default function Home() {
   );
 
   useEffect(() => {
-    setMounted(true);
+    const animId = requestAnimationFrame(() => {
+      setMounted(true);
+    });
     
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(animId);
     };
   }, []);
 
-  if (!mounted) return <div style={{ background: "#0b0a0a", minHeight: "100vh" }} />;
 
-  const features = [
-    {
-      title: "Strategic Alignment",
-      description:
-        "Stay committed to your brand vision with regular strategy check-ins, guidelines audits, and structured touchpoints.",
-      skeleton: <Accountability />,
-      className: "",
-    },
-    {
-      title: "Founder Chronology",
-      description:
-        "Translate raw history into cultural influence. We co-create intimate founder narratives that establish authentic human connections.",
-      skeleton: <Encouragement />,
-      className: "",
-    },
-    {
-      title: "Elite Creative Hub",
-      description:
-        "Work alongside a handpicked collective of visual artists, filmmakers, 3D designers, and digital copywriters.",
-      skeleton: <Mentorship />,
-      className: "",
-    },
-    {
-      title: "Tactile Review Hangouts",
-      description:
-        "Immersive critique sessions where we dissect typographic grids, polish motion patterns, and refine physical packaging proofs.",
-      skeleton: <DoubtClearing />,
-      className: "",
-    },
-    {
-      title: "Dynamic Visual Assets",
-      description:
-        "A multidisciplinary creative system offering bespoke typography, high-definition 3D art, and tangible design systems.",
-      skeleton: <PeerGroup />,
-      className: "",
-    },
-    {
-      title: "Launch Pipeline Tracking",
-      description:
-        "From early moodboards to marketing launch campaigns, we coordinate asset delivery and production schedules with absolute precision.",
-      skeleton: <ProgressTracking />,
-      className: "",
-    },
-  ];
 
-  const capabilities: Capability[] = [
+
+  const teamMembers = [
     {
-      id: "brand-identity",
-      num: "01",
-      title: "Brand Identity",
-      description: "Crafting distinct visual worlds including typography systems, responsive color architectures, logos, and comprehensive guidelines that convey human depth.",
-      icon: <Layers size={20} />
+      name: "Ishan Jain",
+      role: "Founder",
+      image: "/team/Ishan Jain - Founder.jpg"
     },
     {
-      id: "creative-direction",
-      num: "02",
-      title: "Creative Direction",
-      description: "Defining high-level creative concepts, styling, visual metaphors, and brand guidelines that maintain a cohesive voice across physical and digital mediums.",
-      icon: <Compass size={20} />
+      name: "Rahul",
+      role: "Video Editor & Co-Founder",
+      image: "/team/ rahul - video editor and cofounder.jpg"
     },
     {
-      id: "founder-branding",
-      num: "03",
-      title: "Founder Branding",
-      description: "Translating individual founder philosophies, personal narratives, and human charisma into authoritative and magnetic brand extensions.",
-      icon: <Sparkles size={20} />
+      name: "Mohinder",
+      role: "Editor",
+      image: "/team/Mohinder - editor.jpg"
     },
     {
-      id: "campaign-strategy",
-      num: "04",
-      title: "Campaign Strategy",
-      description: "Developing culturally relevant, analytical marketing frameworks and narrative positioning plans designed to maximize brand resonance and user engagement.",
-      icon: <FileText size={20} />
+      name: "Ramit",
+      role: "D.O.P.",
+      image: "/team/Ramit - D.O.P.jpg"
     },
     {
-      id: "photography-videography",
-      num: "05",
-      title: "Photography & Videography",
-      description: "Producing cinematic fashion portraits, evocative brand films, and high-fidelity video campaigns with sophisticated shadow-play and color gradients.",
-      icon: <Camera size={20} />
+      name: "Archit",
+      role: "Script Writer",
+      image: "/team/archit - script writing.jpg"
     },
     {
-      id: "social-media-systems",
-      num: "06",
-      title: "Social Media Systems",
-      description: "Architecting structured editorial grids, interactive micro-animations, and content frameworks that elevate day-to-day community interaction.",
-      icon: <Globe size={20} />
+      name: "Gino",
+      role: "Music Expert",
+      image: "/team/gino-music expert.jpg"
     },
     {
-      id: "motion-visuals",
-      num: "07",
-      title: "3D & Motion Visuals",
-      description: "Developing hyper-realistic liquid simulations, fluid physics animations, and immersive spatial 3D elements for digital platforms.",
-      icon: <Film size={20} />
+      name: "Gaurav",
+      role: "Sound Producer",
+      image: "/team/gaurav-soundproducer.jpg"
     },
     {
-      id: "marketing-launch",
-      num: "08",
-      title: "Marketing & Launch",
-      description: "Orchestrating high-impact market entry strategies, physical event direction, and experiential campaigns that capture instant global awareness.",
-      icon: <ArrowUpRight size={20} />
+      name: "Niemisha",
+      role: "Branding Designer",
+      image: "/team/niemisha - branding.jpg"
+    },
+    {
+      name: "Omkar",
+      role: "Web Developer",
+      image: "/team/omkar - web dev.jpg"
+    },
+    {
+      name: "Raghav",
+      role: "UI/UX Designer",
+      image: "/team/raghav - ui:ux.jpg"
     }
   ];
 
@@ -674,42 +244,12 @@ export default function Home() {
     }, 5000);
   };
 
+  if (!mounted) return <div style={{ background: "#0b0a0a", minHeight: "100vh" }} />;
+
   return (
     <div className="relative overflow-x-hidden min-h-screen">
       {/* Premium SVG Noise Overlay */}
       <div className="noise-overlay" />
-
-      {/* Custom Cursor - Hidden on Touch Devices */}
-      <motion.div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          borderRadius: "50%",
-          pointerEvents: "none",
-          zIndex: 9999,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          mixBlendMode: "difference"
-        }}
-        className="hidden md:flex"
-        animate={{
-          x: mousePos.x - (cursorType === "view" ? 40 : cursorType === "hover" ? 15 : 6),
-          y: mousePos.y - (cursorType === "view" ? 40 : cursorType === "hover" ? 15 : 6),
-          width: cursorType === "view" ? 80 : cursorType === "hover" ? 30 : 12,
-          height: cursorType === "view" ? 80 : cursorType === "hover" ? 30 : 12,
-          backgroundColor: cursorType === "view" ? "#d9bb97" : cursorType === "hover" ? "rgba(179, 74, 38, 0.4)" : "#b34a26",
-          border: cursorType === "view" ? "1px solid #0b0a0a" : cursorType === "hover" ? "1px solid #b34a26" : "none"
-        }}
-        transition={{ type: "spring", stiffness: 400, damping: 28, mass: 0.6 }}
-      >
-        {cursorType === "view" && (
-          <span style={{ fontSize: "10px", letterSpacing: "0.2em" }} className="font-bold font-syne uppercase text-black">
-            View
-          </span>
-        )}
-      </motion.div>
 
       {/* Navigation Header */}
       <header className="studio-header">
@@ -726,6 +266,8 @@ export default function Home() {
                 src="/logo.jpg" 
                 alt="I.J_Stories Official Monogram" 
                 fill 
+                sizes="35px"
+                priority
                 style={{ objectFit: "cover" }}
               />
             </div>
@@ -771,6 +313,15 @@ export default function Home() {
               onMouseLeave={() => setCursorType("default")}
             >
               Showcase
+            </a>
+            <a 
+              href="#team" 
+              className="link-hover-effect"
+              style={{ fontSize: "0.85rem", fontWeight: 400, letterSpacing: "0.05em", color: "rgba(217, 187, 151, 0.85)" }}
+              onMouseEnter={() => setCursorType("hover")}
+              onMouseLeave={() => setCursorType("default")}
+            >
+              Team
             </a>
           </nav>
 
@@ -851,6 +402,14 @@ export default function Home() {
               >
                 Showcase
               </a>
+              <a 
+                href="#team" 
+                onClick={() => setMobileMenuOpen(false)}
+                style={{ fontSize: "1.75rem", fontWeight: 700 }}
+                className="hover:text-orange"
+              >
+                Team
+              </a>
             </nav>
             <hr style={{ border: "none", borderTop: "1px solid rgba(217, 187, 151, 0.1)" }} />
             <a 
@@ -875,12 +434,30 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="hero-section section-dark">
+        {/* Ambient background video */}
+        <video
+          src="/backgroundvideo.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            opacity: 0.15,
+            pointerEvents: "none",
+            zIndex: 0
+          }}
+        />
         {/* Subtle orange ambient glow */}
         <div className="orange-glow w-[500px] h-[500px] top-[-100px] right-[-100px]" />
         <div className="orange-glow w-[600px] h-[600px] bottom-[-200px] left-[-200px]" />
         
         {/* Grid Overlay */}
-        <div className="grid-bg" />
+        <div className="grid-bg" style={{ zIndex: 1 }} />
 
         <div className="container z-10 py-12">
           <div className="hero-content-wrapper">
@@ -956,43 +533,6 @@ export default function Home() {
                 </a>
               </motion.div>
             </div>
-
-            {/* Interactive Hero Visual */}
-            <div className="hero-visual-block">
-              <motion.div 
-                className="hero-visual-card"
-                initial={{ opacity: 0, scale: 0.9, rotate: 2 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                onMouseEnter={() => setCursorType("view")}
-                onMouseLeave={() => setCursorType("default")}
-              >
-                <Image 
-                  src="/abstract_motion_art.png" 
-                  alt="I.J_Stories Abstract Fluid Motion"
-                  fill
-                  priority
-                  style={{ objectFit: "cover" }}
-                  className="transition-transform duration-700 hover:scale-105"
-                />
-                {/* Backdrop Gradient overlay */}
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(11, 10, 10, 0.8) 0%, rgba(11, 10, 10, 0.1) 70%, transparent 100%)", pointerEvents: "none" }} />
-                
-                <div className="hero-card-bottom-bar">
-                  <div>
-                    <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", color: "var(--orange)", textTransform: "uppercase", marginBottom: "0.25rem" }}>
-                      Interactive Showcase
-                    </p>
-                    <h3 className="font-syne text-cream" style={{ fontSize: "1.25rem", fontWeight: 700 }}>
-                      Fluid Brand Dynamics
-                    </h3>
-                  </div>
-                  <div className="hero-play-btn">
-                    <Play size={16} style={{ transform: "translateX(1px)" }} className="fill-black" />
-                  </div>
-                </div>
-              </motion.div>
-            </div>
           </div>
         </div>
       </section>
@@ -1024,6 +564,7 @@ export default function Home() {
                     src="/logo.jpg" 
                     alt="I.J_Stories Brand Seal" 
                     fill 
+                    sizes="144px"
                     style={{ objectFit: "cover" }}
                   />
                 </div>
@@ -1065,45 +606,29 @@ export default function Home() {
       </motion.section>
 
       {/* Capabilities Section */}
-      <section id="capabilities" className="capabilities-section section-dark">
+      {/* Elite Creative Hub Section */}
+      <section id="capabilities" className="capabilities-section section-dark py-24 relative overflow-hidden">
         <div className="orange-glow w-[500px] h-[500px] bottom-[-100px] right-[-100px]" />
         <div className="grid-bg" />
 
         <div className="container z-10">
-          <div className="capabilities-header-block">
+          <div className="capabilities-header-block mb-12">
             <div>
               <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", color: "var(--orange)", display: "inline-block", marginBottom: "0.75rem" }} className="uppercase">
-                Our Capabilities
+                Elite Creative Collective
               </span>
-              <h2 className="font-syne text-cream">
-                What We Build<span style={{ color: "var(--orange)" }}>.</span>
+              <h2 className="font-syne text-cream" style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", lineHeight: 1.1 }}>
+                Elite Creative Hub<span style={{ color: "var(--orange)" }}>.</span>
               </h2>
             </div>
-            <p className="capabilities-header-desc">
-              Crafting premium visual landscapes and human narratives from high-level positioning to digital execution.
+            <p className="capabilities-header-desc" style={{ color: "rgba(217, 187, 151, 0.6)", maxWidth: "32rem", fontSize: "0.95rem", lineHeight: 1.6 }}>
+              Work alongside a handpicked collective of visual artists, filmmakers, 3D designers, and digital copywriters operating globally.
             </p>
           </div>
 
-          {/* Bento Grid Capabilities Showcase */}
-          <div className="bento-card-grid">
-            {features.map((feature, idx) => (
-              <div 
-                key={feature.title + idx} 
-                className={cn("bento-card", feature.className)}
-                onMouseEnter={() => setCursorType("hover")}
-                onMouseLeave={() => setCursorType("default")}
-              >
-                <div className="bento-card-skeleton">
-                  {feature.skeleton}
-                </div>
-                <h3 className="bento-card-title font-syne">
-                  {feature.title}
-                </h3>
-                <p className="bento-card-desc">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+          {/* Mentorship Marquees Showcase */}
+          <div className="w-full relative py-8 overflow-hidden rounded-xl" style={{ backgroundColor: "rgba(255,255,255,0.01)", border: "1px solid rgba(217, 187, 151, 0.05)" }}>
+            <Mentorship />
           </div>
         </div>
       </section>
@@ -1134,6 +659,7 @@ export default function Home() {
                   src="/brand_identity_mockup.png" 
                   alt="I.J_Stories Brand identity publication mockup"
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 450px"
                   style={{ objectFit: "cover" }}
                   className="transition-transform duration-700 hover:scale-105"
                 />
@@ -1160,6 +686,7 @@ export default function Home() {
                   src="/creative_direction_portrait.png" 
                   alt="I.J_Stories Creative Studio Portrait"
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 450px"
                   style={{ objectFit: "cover" }}
                   className="transition-transform duration-700 hover:scale-105"
                 />
@@ -1212,6 +739,52 @@ export default function Home() {
                 </a>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Team Section (Interactive Portrait Grid) */}
+      <section id="team" className="team-section section-dark py-24 relative overflow-hidden">
+        <div className="orange-glow w-[500px] h-[500px] bottom-[-100px] left-[-100px]" />
+        <div className="grid-bg" />
+
+        <div className="container z-10">
+          <div className="showcase-header" style={{ marginBottom: "4rem" }}>
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", color: "var(--orange)", display: "inline-block", marginBottom: "0.75rem" }} className="uppercase">
+              The Team
+            </span>
+            <h2 className="font-syne text-cream">
+              Meet the minds shaping your narrative
+            </h2>
+          </div>
+
+          <div className="team-grid">
+            {teamMembers.map((member, idx) => (
+              <motion.div
+                key={member.name}
+                className="team-card"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: idx * 0.05, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div className="team-image-wrapper">
+                  <Image
+                    src={member.image}
+                    alt={member.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    style={{ objectFit: "cover" }}
+                    className="team-image"
+                  />
+                  <div className="team-overlay-glow" />
+                </div>
+                <div className="team-info">
+                  <h3 className="team-name font-syne">{member.name}</h3>
+                  <p className="team-role">{member.role}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -1353,10 +926,10 @@ export default function Home() {
             <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", color: "var(--orange)", display: "inline-block", marginBottom: "0.75rem" }} className="uppercase">
-                  Let's Begin
+                  Let&apos;s Begin
                 </span>
                 <h2 className="font-syne text-cream" style={{ fontSize: "3.5rem", fontWeight: 800 }}>
-                  Let's build a brand that feels human<span style={{ color: "var(--orange)" }}>.</span>
+                  Let&apos;s build a brand that feels human<span style={{ color: "var(--orange)" }}>.</span>
                 </h2>
                 <p style={{ color: "rgba(217, 187, 151, 0.7)", fontWeight: 300, lineHeight: 1.6, marginTop: "1.5rem", fontSize: "1rem", maxWidth: "26rem" }}>
                   Have a vision? Need a complete rebrand, dynamic motion strategy, or custom photographic direction? Get in touch. Our ecosystem is ready.
@@ -1502,6 +1075,7 @@ export default function Home() {
                   src="/logo.jpg" 
                   alt="I.J_Stories Official Monogram" 
                   fill 
+                  sizes="52px"
                   style={{ objectFit: "cover" }}
                 />
               </div>
@@ -1553,6 +1127,261 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      <CookieConsent />
     </div>
   );
 }
+
+// ==========================================
+// COOKIE CONSENT COMPONENTS (OGILVY INSPIRED)
+// ==========================================
+
+const CookieToggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => {
+  return (
+    <div 
+      onClick={onChange}
+      style={{
+        width: "2.2rem",
+        height: "1.1rem",
+        borderRadius: "9999px",
+        backgroundColor: checked ? "var(--orange)" : "rgba(217, 187, 151, 0.1)",
+        border: "1px solid rgba(217, 187, 151, 0.15)",
+        position: "relative",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        padding: "2px",
+        transition: "background-color 0.3s ease"
+      }}
+    >
+      <motion.div 
+        layout
+        style={{
+          width: "0.8rem",
+          height: "0.8rem",
+          borderRadius: "50%",
+          backgroundColor: checked ? "#fff" : "rgba(217, 187, 151, 0.5)",
+        }}
+        animate={{
+          x: checked ? "1.1rem" : "0rem"
+        }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      />
+    </div>
+  );
+};
+
+export const CookieConsent = () => {
+  const [visible, setVisible] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [functionalCookies, setFunctionalCookies] = useState(false);
+  const [performanceCookies, setPerformanceCookies] = useState(false);
+
+  useEffect(() => {
+    const hasConsented = localStorage.getItem("ijstories-cookie-preference");
+    if (!hasConsented) {
+      const timer = setTimeout(() => {
+        setVisible(true);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleAcceptAll = () => {
+    localStorage.setItem("ijstories-cookie-preference", JSON.stringify({
+      necessary: true,
+      functional: true,
+      performance: true
+    }));
+    setVisible(false);
+  };
+
+  const handleSavePreferences = () => {
+    localStorage.setItem("ijstories-cookie-preference", JSON.stringify({
+      necessary: true,
+      functional: functionalCookies,
+      performance: performanceCookies
+    }));
+    setVisible(false);
+  };
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0, y: 50, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 30, scale: 0.95 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            position: "fixed",
+            bottom: "2rem",
+            right: "2rem",
+            width: "min(380px, 90vw)",
+            backgroundColor: "rgba(11, 10, 10, 0.92)",
+            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(217, 187, 151, 0.15)",
+            borderRadius: "12px",
+            padding: "1.5rem",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+            zIndex: 99999,
+            color: "var(--cream)",
+          }}
+          className="shadow-2xl"
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            
+            {/* Title */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <div style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--orange)" }} />
+              <h4 className="font-syne" style={{ fontSize: "1.05rem", fontWeight: 700 }}>
+                Our use of cookies
+              </h4>
+            </div>
+
+            {/* Content view toggle */}
+            {!showSettings ? (
+              <>
+                <p style={{ fontSize: "0.75rem", color: "rgba(217, 187, 151, 0.75)", lineHeight: 1.5, fontWeight: 300 }}>
+                  I.J_Stories uses cookies, some are necessary for the operation of the website and some are designed to improve your experience. For more information,{" "}
+                  <button 
+                    onClick={() => setShowSettings(true)}
+                    style={{ background: "none", border: "none", color: "var(--orange)", padding: 0, cursor: "pointer", textDecoration: "underline", fontSize: "0.75rem", fontWeight: 500 }}
+                  >
+                    click here
+                  </button>.
+                </p>
+                <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+                  <button 
+                    onClick={() => setShowSettings(true)}
+                    style={{
+                      flex: 1,
+                      padding: "0.55rem",
+                      borderRadius: "6px",
+                      border: "1px solid rgba(217, 187, 151, 0.15)",
+                      backgroundColor: "transparent",
+                      color: "var(--cream)",
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                    className="hover:bg-[rgba(217,187,151,0.05)]"
+                  >
+                    Manage Settings
+                  </button>
+                  <button 
+                    onClick={handleAcceptAll}
+                    style={{
+                      flex: 1,
+                      padding: "0.55rem",
+                      borderRadius: "6px",
+                      border: "none",
+                      backgroundColor: "var(--orange)",
+                      color: "#fff",
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                    className="hover:opacity-90"
+                  >
+                    Accept All
+                  </button>
+                </div>
+              </>
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                style={{ display: "flex", flexDirection: "column", gap: "1rem", overflow: "hidden" }}
+              >
+                <hr style={{ border: "none", borderTop: "1px solid rgba(217, 187, 151, 0.1)" }} />
+                
+                {/* Accordion Lists */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+                  
+                  {/* Necessary cookies */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--cream)" }}>Necessary cookies</span>
+                      <span style={{ fontSize: "0.65rem", fontWeight: 700, color: "var(--orange)" }} className="uppercase">Always Active</span>
+                    </div>
+                    <p style={{ fontSize: "0.7rem", color: "rgba(217, 187, 151, 0.55)", lineHeight: 1.45, fontWeight: 300 }}>
+                      Are essential to move around I.J_Stories and use its core functionality and enhanced features. Without these cookies, services you have asked for cannot be provided.
+                    </p>
+                  </div>
+
+                  {/* Functional cookies */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--cream)" }}>Functional cookies</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <span style={{ fontSize: "0.65rem", color: "rgba(217, 187, 151, 0.5)", textTransform: "uppercase" }}>{functionalCookies ? "On" : "Off"}</span>
+                        <CookieToggle checked={functionalCookies} onChange={() => setFunctionalCookies(!functionalCookies)} />
+                      </div>
+                    </div>
+                    <p style={{ fontSize: "0.7rem", color: "rgba(217, 187, 151, 0.55)", lineHeight: 1.45, fontWeight: 300 }}>
+                      Allow I.J_Stories to remember choices you make to give you better functionality and personal features.
+                    </p>
+                  </div>
+
+                  {/* Performance cookies */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--cream)" }}>Performance cookies</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <span style={{ fontSize: "0.65rem", color: "rgba(217, 187, 151, 0.5)", textTransform: "uppercase" }}>{performanceCookies ? "On" : "Off"}</span>
+                        <CookieToggle checked={performanceCookies} onChange={() => setPerformanceCookies(!performanceCookies)} />
+                      </div>
+                    </div>
+                    <p style={{ fontSize: "0.7rem", color: "rgba(217, 187, 151, 0.55)", lineHeight: 1.45, fontWeight: 300 }}>
+                      Help improve the performance of I.J_Stories by collecting and reporting information about how you use the website.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+                  <button 
+                    onClick={() => setShowSettings(false)}
+                    style={{
+                      padding: "0.55rem 1rem",
+                      borderRadius: "6px",
+                      border: "1px solid rgba(217, 187, 151, 0.15)",
+                      backgroundColor: "transparent",
+                      color: "var(--cream)",
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      cursor: "pointer"
+                    }}
+                    className="hover:bg-[rgba(217,187,151,0.05)]"
+                  >
+                    Back
+                  </button>
+                  <button 
+                    onClick={handleSavePreferences}
+                    style={{
+                      flex: 1,
+                      padding: "0.55rem",
+                      borderRadius: "6px",
+                      border: "none",
+                      backgroundColor: "var(--orange)",
+                      color: "#fff",
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      cursor: "pointer"
+                    }}
+                    className="hover:opacity-90"
+                  >
+                    Save Preferences
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
