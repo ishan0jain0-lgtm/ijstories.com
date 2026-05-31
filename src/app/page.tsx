@@ -171,6 +171,11 @@ export default function Home() {
       image: "/team/ rahul - video editor and cofounder.jpg"
     },
     {
+      name: "Jasleen",
+      role: "Manager",
+      image: "/team/Jasleen - Manager.png"
+    },
+    {
       name: "Mohinder",
       role: "Editor",
       image: "/team/Mohinder - editor.jpg"
