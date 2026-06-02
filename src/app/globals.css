@@ -636,16 +636,15 @@ a {
 }
 
 .showcase-masonry-grid {
-  display: grid;
-  grid-template-columns: 4fr 5fr 3fr;
-  gap: 2rem;
-  align-items: stretch;
+  column-count: 2;
+  column-gap: 2rem;
+  width: 100%;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .showcase-masonry-grid {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
+    column-count: 1;
+    column-gap: 0;
   }
 }
 
@@ -655,9 +654,9 @@ a {
   overflow: hidden;
   border: 1px solid rgba(217, 187, 151, 0.1);
   background-color: var(--dark-gray);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: block;
+  break-inside: avoid;
+  margin-bottom: 2rem;
   transition: transform 0.3s ease;
 }
 
@@ -1001,8 +1000,8 @@ a {
 
 /* Philosophy Section Spacing */
 .philosophy-section {
-  padding-top: 11rem !important; /* Generous visual breathing space */
-  padding-bottom: 11rem !important;
+  padding-top: 5.5rem !important; /* Balanced visual breathing space */
+  padding-bottom: 5.5rem !important;
   position: relative;
   overflow: hidden;
 }
@@ -1019,8 +1018,8 @@ a {
 
 @media (max-width: 768px) {
   .philosophy-section {
-    padding-top: 8rem !important;
-    padding-bottom: 8rem !important;
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
   }
 }
 

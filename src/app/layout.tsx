@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Roboto, Roboto_Condensed, Roboto_Serif } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import ImageKitProviderWrapper from "@/components/ImageKitProviderWrapper";
 
 const roboto = Roboto({
   variable: "--font-sans",
@@ -61,7 +62,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn(robotoSerif.variable, robotoCondensed.variable, "font-sans", roboto.variable)} suppressHydrationWarning>
-      <body className="antialiased" suppressHydrationWarning>{children}</body>
+      <body className="antialiased" suppressHydrationWarning>
+        <ImageKitProviderWrapper>
+          {children}
+        </ImageKitProviderWrapper>
+      </body>
     </html>
   );
 }
