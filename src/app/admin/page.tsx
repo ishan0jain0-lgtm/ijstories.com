@@ -506,6 +506,29 @@ export default function AdminDashboard() {
             <button onClick={loadData} className="p-2 rounded-lg hover:bg-[rgba(217,187,151,0.05)] transition-all text-[rgba(217,187,151,0.6)] hover:text-[#d9bb97]" title="Reload data">
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
             </button>
+
+            {/* MongoDB Connection Status Badge */}
+            {db.isFallback ? (
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-amber-950/40 border border-amber-900/30 text-amber-400 font-semibold" title="MongoDB Connection Failed">
+                DB: Offline
+              </span>
+            ) : (
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-950/40 border border-emerald-900/30 text-emerald-400 font-semibold" title="MongoDB Connection Active">
+                DB: Online
+              </span>
+            )}
+
+            {/* ImageKit Integration Status Badge */}
+            {urlEndpoint ? (
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-950/40 border border-emerald-900/30 text-emerald-400 font-semibold" title="ImageKit Configured">
+                ImageKit: Active
+              </span>
+            ) : (
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-amber-950/40 border border-amber-900/30 text-amber-400 font-semibold" title="ImageKit Credentials Missing">
+                ImageKit: Missing
+              </span>
+            )}
+
             <span className="text-xs px-2.5 py-1 rounded-full bg-[rgba(179,74,38,0.1)] border border-[rgba(179,74,38,0.2)] text-[#b34a26] font-semibold">
               Admin Portal
             </span>
@@ -594,6 +617,29 @@ export default function AdminDashboard() {
                     <h2 className="text-2xl font-bold font-syne text-white">System Status</h2>
                     <p className="text-sm text-[rgba(217,187,151,0.6)] mt-1">Quick operational indicators for I.J_Stories website resources.</p>
                   </div>
+
+                  {/* MongoDB Connection Status Indicator Box */}
+                  {!db.isFallback ? (
+                    <div className="p-3.5 rounded-xl border border-emerald-950 bg-emerald-950/10 text-emerald-400 text-xs flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle size={16} />
+                        <span>MongoDB Atlas Database is online and connected successfully.</span>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-400 font-bold uppercase tracking-wider">
+                        Connected
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="p-3.5 rounded-xl border border-amber-900/30 bg-amber-950/10 text-amber-300 text-xs flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                        <span>MongoDB Atlas Connection Failed. Operating in offline fallback mode.</span>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-300 font-bold uppercase tracking-wider">
+                        Fallback Mode
+                      </span>
+                    </div>
+                  )}
 
                   {/* Config Stats */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
