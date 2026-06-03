@@ -191,28 +191,38 @@ export const ShowcaseItemModel = models.ShowcaseItem || model("ShowcaseItem", Sh
 export const LeadModel = models.Lead || model("Lead", LeadSchema);
 
 export async function getDb(): Promise<DatabaseSchema> {
-  await dbConnect();
+  try {
+    await dbConnect();
 
-  const teamMembers = await TeamMemberModel.find({}).lean();
-  const blogPosts = await BlogPostModel.find({}).lean();
-  const showcaseItems = await ShowcaseItemModel.find({}).lean();
-  const leads = await LeadModel.find({}).sort({ timestamp: -1 }).lean();
+    const teamMembers = await TeamMemberModel.find({}).lean();
+    const blogPosts = await BlogPostModel.find({}).lean();
+    const showcaseItems = await ShowcaseItemModel.find({}).lean();
+    const leads = await LeadModel.find({}).sort({ timestamp: -1 }).lean();
 
-  return {
-    teamMembers: teamMembers.map((m: any) => ({ name: m.name, role: m.role, image: m.image })),
-    blogPosts: blogPosts.map((n: any) => ({
-      id: n.id,
-      tag: n.tag,
-      title: n.title,
-      snippet: n.snippet,
-      content: n.content || "",
-      quote: n.quote || "",
-      timestamp: n.timestamp || new Date().toISOString(),
-      image: n.image || ""
-    })),
-    showcaseItems: showcaseItems.map((s: any) => ({ id: s.id, tag: s.tag, title: s.title, image: s.image, link: s.link, images: s.images || [], width: s.width || 800, height: s.height || 600 })),
-    leads: leads.map((l: any) => ({ id: l.id, name: l.name, email: l.email, interest: l.interest, message: l.message, timestamp: l.timestamp }))
-  };
+    return {
+      teamMembers: teamMembers.map((m: any) => ({ name: m.name, role: m.role, image: m.image })),
+      blogPosts: blogPosts.map((n: any) => ({
+        id: n.id,
+        tag: n.tag,
+        title: n.title,
+        snippet: n.snippet,
+        content: n.content || "",
+        quote: n.quote || "",
+        timestamp: n.timestamp || new Date().toISOString(),
+        image: n.image || ""
+      })),
+      showcaseItems: showcaseItems.map((s: any) => ({ id: s.id, tag: s.tag, title: s.title, image: s.image, link: s.link, images: s.images || [], width: s.width || 800, height: s.height || 600 })),
+      leads: leads.map((l: any) => ({ id: l.id, name: l.name, email: l.email, interest: l.interest, message: l.message, timestamp: l.timestamp }))
+    };
+  } catch (error) {
+    console.error("Failed to fetch MongoDB database, using defaults:", error);
+    return {
+      teamMembers: defaultTeamMembers,
+      blogPosts: defaultBlogPosts,
+      showcaseItems: defaultShowcaseItems,
+      leads: []
+    };
+  }
 }
 
 export async function writeDb(db: Partial<DatabaseSchema>): Promise<boolean> {
