@@ -39,12 +39,15 @@ export interface TeamMember {
   image: string;
 }
 
-export interface NotebookNote {
+export interface BlogPost {
   id: string;
   tag: string;
   title: string;
   snippet: string;
-  quote: string;
+  content: string;
+  quote?: string;
+  timestamp: string;
+  image?: string;
 }
 
 export interface ShowcaseItem {
@@ -69,7 +72,7 @@ export interface Lead {
 
 export interface DatabaseSchema {
   teamMembers: TeamMember[];
-  notebookNotes: NotebookNote[];
+  blogPosts: BlogPost[];
   showcaseItems: ShowcaseItem[];
   leads: Lead[];
 }
@@ -88,27 +91,36 @@ const defaultTeamMembers: TeamMember[] = [
   { name: "Raghav", role: "UI/UX Designer", image: "/team/raghav - ui:ux.jpg" }
 ];
 
-const defaultNotebookNotes: NotebookNote[] = [
+const defaultBlogPosts: BlogPost[] = [
   {
-    id: "note-1",
+    id: "blog-1",
     tag: "PHILOSOPHY",
     title: "The Human Brand Paradox",
     snippet: "Why do we love some brands and ignore others? Because some feel like sterile corporations, and others feel like human characters. We design for character, not corporations.",
-    quote: "“A brand is a living entity, an emotional bank account. From identity to influence, it must beat like a human heart.”"
+    content: "Why do we love some brands and ignore others? Because some feel like sterile corporations, and others feel like human characters. We design for character, not corporations.\n\n### The Core Connection\n\nIn the digital age, consumers are bombarded with messages. The brands that stand out are those that build an emotional bank account. They don't just speak; they listen, they adapt, and they exhibit human traits.\n\n### Authenticity vs. Manufacture\n\nConsistency creates trust; authenticity creates devotion. If it is manufactured, humans will sense it instantly. We must construct visual and narrative landscapes that resonate on a personal level.",
+    quote: "“A brand is a living entity, an emotional bank account. From identity to influence, it must beat like a human heart.”",
+    timestamp: new Date().toISOString(),
+    image: "/brand_identity_mockup.png"
   },
   {
-    id: "note-2",
+    id: "blog-2",
     tag: "STRATEGY",
     title: "Identity is More Than a Logo",
     snippet: "A logo is an anchor, but an identity is an entire landscape. It is the texture of the linen paper, the subtle pacing of a film, the spacing of text, the quiet confidence of your brand voice.",
-    quote: "“Consistency creates trust; authenticity creates devotion. If it is manufactured, humans will sense it instantly.”"
+    content: "A logo is an anchor, but an identity is an entire landscape. It is the texture of the linen paper, the subtle pacing of a film, the spacing of text, the quiet confidence of your brand voice.\n\n### Designing the Landscape\n\nWhen we construct a brand identity, we think about the entire sensory experience. How does the paper feel? How does a video transition flow? What is the pace of communication? These details form the silent brand language.",
+    quote: "“Consistency creates trust; authenticity creates devotion. If it is manufactured, humans will sense it instantly.”",
+    timestamp: new Date().toISOString(),
+    image: "/creative_direction_portrait.png"
   },
   {
-    id: "note-3",
+    id: "blog-3",
     tag: "COLLABORATION",
     title: "The Ecosystem Advantage",
     snippet: "By operating a lean core alongside an international ecosystem of filmmakers, visual artists, and thinkers, we bypass agency bloat and match elite talent directly with our clients.",
-    quote: "“Creativity cannot be mass-produced in silos. We bring the right minds together at the perfect cultural moment.”"
+    content: "By operating a lean core alongside an international ecosystem of filmmakers, visual artists, and thinkers, we bypass agency bloat and match elite talent directly with our clients.\n\n### Scaling Fluidly\n\nWe don't maintain a massive, stagnant office. Instead, we run a nimble core that orchestrates international talent on demand. This approach matches your project with elite filmmakers, developers, and designers suited precisely for your brand.",
+    quote: "“Creativity cannot be mass-produced in silos. We bring the right minds together at the perfect cultural moment.”",
+    timestamp: new Date().toISOString(),
+    image: "/brand_identity_mockup.png"
   }
 ];
 
@@ -142,12 +154,15 @@ const TeamMemberSchema = new Schema({
   image: { type: String, required: true }
 });
 
-const NotebookNoteSchema = new Schema({
+const BlogPostSchema = new Schema({
   id: { type: String, required: true },
   tag: { type: String, required: true },
   title: { type: String, required: true },
   snippet: { type: String, required: true },
-  quote: { type: String }
+  content: { type: String, required: true },
+  quote: { type: String },
+  timestamp: { type: String, required: true },
+  image: { type: String }
 });
 
 const ShowcaseItemSchema = new Schema({
@@ -171,45 +186,33 @@ const LeadSchema = new Schema({
 });
 
 export const TeamMemberModel = models.TeamMember || model("TeamMember", TeamMemberSchema);
-export const NotebookNoteModel = models.NotebookNote || model("NotebookNote", NotebookNoteSchema);
+export const BlogPostModel = models.BlogPost || model("BlogPost", BlogPostSchema);
 export const ShowcaseItemModel = models.ShowcaseItem || model("ShowcaseItem", ShowcaseItemSchema);
 export const LeadModel = models.Lead || model("Lead", LeadSchema);
 
 export async function getDb(): Promise<DatabaseSchema> {
-  try {
-    await dbConnect();
+  await dbConnect();
 
-    let teamMembers = await TeamMemberModel.find({}).lean();
-    let notebookNotes = await NotebookNoteModel.find({}).lean();
-    let showcaseItems = await ShowcaseItemModel.find({}).lean();
-    let leads = await LeadModel.find({}).sort({ timestamp: -1 }).lean();
+  const teamMembers = await TeamMemberModel.find({}).lean();
+  const blogPosts = await BlogPostModel.find({}).lean();
+  const showcaseItems = await ShowcaseItemModel.find({}).lean();
+  const leads = await LeadModel.find({}).sort({ timestamp: -1 }).lean();
 
-    // If empty collections, seed the defaults
-    if (teamMembers.length === 0 && notebookNotes.length === 0 && showcaseItems.length === 0) {
-      await TeamMemberModel.insertMany(defaultTeamMembers);
-      await NotebookNoteModel.insertMany(defaultNotebookNotes);
-      await ShowcaseItemModel.insertMany(defaultShowcaseItems);
-      
-      teamMembers = await TeamMemberModel.find({}).lean();
-      notebookNotes = await NotebookNoteModel.find({}).lean();
-      showcaseItems = await ShowcaseItemModel.find({}).lean();
-    }
-
-    return {
-      teamMembers: teamMembers.map((m: any) => ({ name: m.name, role: m.role, image: m.image })),
-      notebookNotes: notebookNotes.map((n: any) => ({ id: n.id, tag: n.tag, title: n.title, snippet: n.snippet, quote: n.quote || "" })),
-      showcaseItems: showcaseItems.map((s: any) => ({ id: s.id, tag: s.tag, title: s.title, image: s.image, link: s.link, images: s.images || [], width: s.width || 800, height: s.height || 600 })),
-      leads: leads.map((l: any) => ({ id: l.id, name: l.name, email: l.email, interest: l.interest, message: l.message, timestamp: l.timestamp }))
-    };
-  } catch (error) {
-    console.error("Failed to fetch MongoDB database", error);
-    return {
-      teamMembers: defaultTeamMembers,
-      notebookNotes: defaultNotebookNotes,
-      showcaseItems: defaultShowcaseItems,
-      leads: []
-    };
-  }
+  return {
+    teamMembers: teamMembers.map((m: any) => ({ name: m.name, role: m.role, image: m.image })),
+    blogPosts: blogPosts.map((n: any) => ({
+      id: n.id,
+      tag: n.tag,
+      title: n.title,
+      snippet: n.snippet,
+      content: n.content || "",
+      quote: n.quote || "",
+      timestamp: n.timestamp || new Date().toISOString(),
+      image: n.image || ""
+    })),
+    showcaseItems: showcaseItems.map((s: any) => ({ id: s.id, tag: s.tag, title: s.title, image: s.image, link: s.link, images: s.images || [], width: s.width || 800, height: s.height || 600 })),
+    leads: leads.map((l: any) => ({ id: l.id, name: l.name, email: l.email, interest: l.interest, message: l.message, timestamp: l.timestamp }))
+  };
 }
 
 export async function writeDb(db: Partial<DatabaseSchema>): Promise<boolean> {
@@ -220,9 +223,9 @@ export async function writeDb(db: Partial<DatabaseSchema>): Promise<boolean> {
       await TeamMemberModel.deleteMany({});
       await TeamMemberModel.insertMany(db.teamMembers);
     }
-    if (db.notebookNotes) {
-      await NotebookNoteModel.deleteMany({});
-      await NotebookNoteModel.insertMany(db.notebookNotes);
+    if (db.blogPosts) {
+      await BlogPostModel.deleteMany({});
+      await BlogPostModel.insertMany(db.blogPosts);
     }
     if (db.showcaseItems) {
       await ShowcaseItemModel.deleteMany({});
@@ -238,3 +241,14 @@ export async function writeDb(db: Partial<DatabaseSchema>): Promise<boolean> {
     return false;
   }
 }
+
+import { unstable_cache } from "next/cache";
+
+export const getCachedDb = unstable_cache(
+  async () => getDb(),
+  ["db-content"],
+  {
+    tags: ["db-content"],
+    revalidate: 3600
+  }
+);

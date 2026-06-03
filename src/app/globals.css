@@ -804,49 +804,6 @@ a {
   font-family: var(--font-syne);
 }
 
-/* Collab Network Grid */
-.collab-outer-card {
-  padding: 2.5rem;
-  border-radius: 1.5rem;
-  border: 1px solid rgba(217, 187, 151, 0.1);
-  background: linear-gradient(135deg, #121111 0%, #0e0d0d 100%);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 3rem;
-  position: relative;
-  overflow: hidden;
-}
-
-@media (max-width: 768px) {
-  .collab-outer-card {
-    flex-direction: column;
-    padding: 1.5rem;
-    gap: 2rem;
-  }
-}
-
-.collab-text-col {
-  flex: 1.2;
-}
-
-.collab-grid-col {
-  flex: 0.8;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  width: 100%;
-}
-
-.collab-item-node {
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  background-color: rgba(11, 10, 10, 0.4);
-  border: 1px solid rgba(217, 187, 151, 0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
 
 /* Contact Block */
 .contact-grid-layout {
@@ -1071,21 +1028,6 @@ a {
   }
 }
 
-/* Collaborator Network Section Spacing */
-.collab-section {
-  padding-top: 9rem !important;
-  padding-bottom: 9rem !important;
-  background-color: var(--black);
-  overflow: hidden;
-  position: relative;
-}
-
-@media (max-width: 768px) {
-  .collab-section {
-    padding-top: 7rem !important;
-    padding-bottom: 7rem !important;
-  }
-}
 
 /* Contact Section Spacing */
 .contact-section {

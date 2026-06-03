@@ -156,41 +156,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Network / Collaborator Section */}
-      <section className="collab-section section-dark">
-        <div className="container z-10">
-          <div className="collab-outer-card">
-            {/* Orange glowing flare */}
-            <div className="orange-glow w-[300px] h-[300px] top-[-50px] right-[-50px]" />
-            
-            <div className="collab-text-col">
-              <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", color: "var(--orange)", display: "inline-block", marginBottom: "0.75rem" }} className="uppercase">
-                The Creative Network
-              </span>
-              <h2 className="font-syne text-cream" style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "1.5rem", letterSpacing: "-0.02em" }}>
-                Operating without borders.
-              </h2>
-              <p style={{ color: "rgba(217, 187, 151, 0.7)", fontSize: "0.95rem", fontWeight: 300, lineHeight: 1.6 }}>
-                I.J_Stories functions as a core multidisciplinary team operating alongside an elite distributed network of filmmakers, strategists, developers, 3D artists, and physical space designers. This allows us to scale fluidly from tight conceptual brand sprints to multi-million dollar global launch campaigns.
-              </p>
-            </div>
-
-            <div className="collab-grid-col">
-              {[
-                { label: "Core Hub", value: "Creative Strategy" },
-                { label: "Visual Artists", value: "3D & Motion design" },
-                { label: "Filmmakers", value: "Cinematography" },
-                { label: "Engineers", value: "Next.js & Digital Platforms" }
-              ].map((item, idx) => (
-                <div key={idx} className="collab-item-node">
-                  <p style={{ fontSize: "10px", color: "var(--orange)", fontWeight: 700, letterSpacing: "0.1em" }} className="uppercase">{item.label}</p>
-                  <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--cream)" }} className="font-syne">{item.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Contact Section */}
       <section id="contact" className="contact-section section-dark">

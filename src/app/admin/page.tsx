@@ -27,12 +27,15 @@ interface TeamMember {
   image: string;
 }
 
-interface NotebookNote {
+interface BlogPost {
   id: string;
   tag: string;
   title: string;
   snippet: string;
+  content: string;
   quote: string;
+  timestamp: string;
+  image: string;
 }
 
 interface ShowcaseItem {
@@ -56,17 +59,17 @@ interface Lead {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"overview" | "leads" | "team" | "notebook" | "showcase" | "imagekit">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "leads" | "team" | "blog" | "showcase" | "imagekit">("overview");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [db, setDb] = useState<{
     teamMembers: TeamMember[];
-    notebookNotes: NotebookNote[];
+    blogPosts: BlogPost[];
     showcaseItems: ShowcaseItem[];
     leads: Lead[];
   }>({
     teamMembers: [],
-    notebookNotes: [],
+    blogPosts: [],
     showcaseItems: [],
     leads: []
   });
@@ -93,14 +96,14 @@ export default function AdminDashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Edit / Add Modal States
-  const [modalType, setModalType] = useState<"team" | "notebook" | "showcase" | "leadView" | null>(null);
+  const [modalType, setModalType] = useState<"team" | "blog" | "showcase" | "leadView" | null>(null);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [editIndex, setEditIndex] = useState<number>(-1);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
   // Form Fields
   const [teamForm, setTeamForm] = useState({ name: "", role: "", image: "" });
-  const [notebookForm, setNotebookForm] = useState({ id: "", tag: "", title: "", snippet: "", quote: "" });
+  const [blogForm, setBlogForm] = useState({ id: "", tag: "", title: "", snippet: "", content: "", quote: "", timestamp: "", image: "" });
   const [showcaseForm, setShowcaseForm] = useState<{ id: string; tag: string; title: string; image: string; link: string; images: string[]; width: number; height: number }>({
     id: "",
     tag: "",
@@ -184,11 +187,11 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteNotebook = (index: number) => {
-    if (confirm("Are you sure you want to delete this notebook entry?")) {
-      const nextNotes = [...db.notebookNotes];
-      nextNotes.splice(index, 1);
-      const nextDb = { ...db, notebookNotes: nextNotes };
+  const handleDeleteBlog = (index: number) => {
+    if (confirm("Are you sure you want to delete this blog post?")) {
+      const nextBlogs = [...db.blogPosts];
+      nextBlogs.splice(index, 1);
+      const nextDb = { ...db, blogPosts: nextBlogs };
       saveDb(nextDb);
     }
   };
@@ -223,14 +226,32 @@ export default function AdminDashboard() {
     }
   };
 
-  const openNotebookForm = (mode: "add" | "edit", index = -1) => {
-    setModalType("notebook");
+  const openBlogForm = (mode: "add" | "edit", index = -1) => {
+    setModalType("blog");
     setModalMode(mode);
     setEditIndex(index);
     if (mode === "edit" && index >= 0) {
-      setNotebookForm({ ...db.notebookNotes[index] });
+      setBlogForm({ 
+        id: db.blogPosts[index].id,
+        tag: db.blogPosts[index].tag,
+        title: db.blogPosts[index].title,
+        snippet: db.blogPosts[index].snippet,
+        content: db.blogPosts[index].content || "",
+        quote: db.blogPosts[index].quote || "",
+        timestamp: db.blogPosts[index].timestamp || new Date().toISOString(),
+        image: db.blogPosts[index].image || ""
+      });
     } else {
-      setNotebookForm({ id: "note-" + (db.notebookNotes.length + 1), tag: "", title: "", snippet: "", quote: "" });
+      setBlogForm({ 
+        id: "blog-" + (db.blogPosts.length + 1), 
+        tag: "", 
+        title: "", 
+        snippet: "", 
+        content: "", 
+        quote: "", 
+        timestamp: new Date().toISOString(), 
+        image: "" 
+      });
     }
   };
 
@@ -267,15 +288,19 @@ export default function AdminDashboard() {
     setModalType(null);
   };
 
-  const handleNotebookSubmit = (e: React.FormEvent) => {
+  const handleBlogSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const nextNotes = [...db.notebookNotes];
+    const nextBlogs = [...db.blogPosts];
+    const updatedForm = { 
+      ...blogForm, 
+      timestamp: blogForm.timestamp || new Date().toISOString() 
+    };
     if (modalMode === "edit") {
-      nextNotes[editIndex] = notebookForm;
+      nextBlogs[editIndex] = updatedForm;
     } else {
-      nextNotes.push(notebookForm);
+      nextBlogs.push(updatedForm);
     }
-    saveDb({ ...db, notebookNotes: nextNotes });
+    saveDb({ ...db, blogPosts: nextBlogs });
     setModalType(null);
   };
 
@@ -367,7 +392,13 @@ export default function AdminDashboard() {
           .filter((t) => t.length > 0);
         
         if (uploadCollection.trim()) {
-          tagsArr.push(`collection:${uploadCollection.trim()}`);
+          const collections = uploadCollection
+            .split(",")
+            .map((c) => c.trim())
+            .filter((c) => c.length > 0);
+          collections.forEach((c) => {
+            tagsArr.push(`collection:${c}`);
+          });
         }
 
         const result = await uploadFn({
@@ -475,7 +506,7 @@ export default function AdminDashboard() {
             { id: "overview", label: "Overview", icon: Layers },
             { id: "leads", label: "Form Leads", icon: Mail, count: db.leads.length },
             { id: "team", label: "Team Members", icon: Users, count: db.teamMembers.length },
-            { id: "notebook", label: "Notebook Notes", icon: BookOpen, count: db.notebookNotes.length },
+            { id: "blog", label: "Blog Posts", icon: BookOpen, count: db.blogPosts.length },
             { id: "showcase", label: "Showcase Grid", icon: ImageIcon, count: db.showcaseItems.length },
             { id: "imagekit", label: "ImageKit Lab", icon: UploadCloud }
           ].map((tab) => {
@@ -553,7 +584,7 @@ export default function AdminDashboard() {
                     {[
                       { label: "Leads", val: db.leads.length, color: "text-[#b34a26]", icon: Mail },
                       { label: "Team Size", val: db.teamMembers.length, color: "text-white", icon: Users },
-                      { label: "Journal Entries", val: db.notebookNotes.length, color: "text-white", icon: BookOpen },
+                      { label: "Blog Posts", val: db.blogPosts.length, color: "text-white", icon: BookOpen },
                       { label: "Showcase items", val: db.showcaseItems.length, color: "text-white", icon: ImageIcon }
                     ].map((item, i) => {
                       const Icon = item.icon;
@@ -696,50 +727,55 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              {/* Tab 4: Notebook Editor */}
-              {activeTab === "notebook" && (
+              {/* Tab 4: Blog Editor */}
+              {activeTab === "blog" && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h2 className="text-2xl font-bold font-syne text-white">Creative Notebook</h2>
-                      <p className="text-sm text-[rgba(217,187,151,0.6)] mt-1">Manage strategic journal entries & design philosophies.</p>
+                      <h2 className="text-2xl font-bold font-syne text-white">Blog Manager</h2>
+                      <p className="text-sm text-[rgba(217,187,151,0.6)] mt-1">Write and manage premium blog posts & stories.</p>
                     </div>
                     <button
-                      onClick={() => openNotebookForm("add")}
+                      onClick={() => openBlogForm("add")}
                       className="flex items-center gap-2 px-3 py-2 bg-[#b34a26] text-white hover:bg-[#9a3d1f] font-semibold text-xs rounded-xl shadow-lg shadow-[#b34a26]/20 transition-all"
                     >
-                      <Plus size={14} /> Add Entry
+                      <Plus size={14} /> Add Blog Post
                     </button>
                   </div>
 
                   <div className="space-y-3">
-                    {db.notebookNotes.map((note, idx) => (
-                      <div key={note.id || idx} className="p-4 rounded-xl border border-[rgba(217,187,151,0.08)] bg-[rgba(255,255,255,0.015)] space-y-2">
+                    {db.blogPosts.map((post, idx) => (
+                      <div key={post.id || idx} className="p-4 rounded-xl border border-[rgba(217,187,151,0.08)] bg-[rgba(255,255,255,0.015)] space-y-2">
                         <div className="flex justify-between items-start gap-4">
                           <div className="space-y-1">
-                            <span className="text-[9px] px-2 py-0.5 rounded bg-[rgba(179,74,38,0.1)] text-[#b34a26] font-bold uppercase tracking-wider">
-                              {note.tag}
-                            </span>
-                            <h4 className="text-sm font-bold text-white mt-1">{note.title}</h4>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] px-2 py-0.5 rounded bg-[rgba(179,74,38,0.1)] text-[#b34a26] font-bold uppercase tracking-wider">
+                                {post.tag}
+                              </span>
+                              <span className="text-[9px] text-[rgba(217,187,151,0.4)] font-mono">
+                                {new Date(post.timestamp).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-bold text-white mt-1">{post.title}</h4>
                           </div>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => openNotebookForm("edit", idx)}
+                              onClick={() => openBlogForm("edit", idx)}
                               className="p-2 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(217,187,151,0.06)] hover:bg-[rgba(217,187,151,0.08)] transition-all"
                             >
                               <Edit3 size={14} />
                             </button>
                             <button
-                              onClick={() => handleDeleteNotebook(idx)}
+                              onClick={() => handleDeleteBlog(idx)}
                               className="p-2 rounded-lg bg-red-950/10 border border-red-950/20 text-red-400 hover:bg-red-950/30 transition-all"
                             >
                               <Trash2 size={14} />
                             </button>
                           </div>
                         </div>
-                        <p className="text-xs text-[rgba(217,187,151,0.7)] leading-relaxed max-w-3xl">{note.snippet}</p>
-                        {note.quote && (
-                          <p className="text-[11px] italic text-[#b34a26] border-l-2 border-[#b34a26]/40 pl-2.5 mt-2">{note.quote}</p>
+                        <p className="text-xs text-[rgba(217,187,151,0.7)] leading-relaxed max-w-3xl">{post.snippet}</p>
+                        {post.quote && (
+                          <p className="text-[11px] italic text-[#b34a26] border-l-2 border-[#b34a26]/40 pl-2.5 mt-2">{post.quote}</p>
                         )}
                       </div>
                     ))}
@@ -1209,55 +1245,80 @@ export default function AdminDashboard() {
                 </form>
               )}
 
-              {/* Notebook Form Modal */}
-              {modalType === "notebook" && (
-                <form onSubmit={handleNotebookSubmit} className="space-y-4">
+              {/* Blog Form Modal */}
+              {modalType === "blog" && (
+                <form onSubmit={handleBlogSubmit} className="space-y-4">
                   <h3 className="text-lg font-bold font-syne text-white border-b border-[rgba(217,187,151,0.08)] pb-2">
-                    {modalMode === "edit" ? "Edit Journal Entry" : "Add Journal Entry"}
+                    {modalMode === "edit" ? "Edit Blog Post" : "Add Blog Post"}
                   </h3>
                   
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Category Tag</label>
-                    <input
-                      type="text"
-                      required
-                      value={notebookForm.tag}
-                      onChange={(e) => setNotebookForm({ ...notebookForm, tag: e.target.value.toUpperCase() })}
-                      placeholder="PHILOSOPHY"
-                      className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Category Tag</label>
+                      <input
+                        type="text"
+                        required
+                        value={blogForm.tag}
+                        onChange={(e) => setBlogForm({ ...blogForm, tag: e.target.value.toUpperCase() })}
+                        placeholder="e.g. PHILOSOPHY"
+                        className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Cover Image URL</label>
+                      <input
+                        type="text"
+                        value={blogForm.image}
+                        onChange={(e) => setBlogForm({ ...blogForm, image: e.target.value })}
+                        placeholder="https://ik.imagekit.io/... or /brand_identity_mockup.png"
+                        className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Entry Title</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Blog Title</label>
                     <input
                       type="text"
                       required
-                      value={notebookForm.title}
-                      onChange={(e) => setNotebookForm({ ...notebookForm, title: e.target.value })}
+                      value={blogForm.title}
+                      onChange={(e) => setBlogForm({ ...blogForm, title: e.target.value })}
                       placeholder="Why Storytelling Matters"
                       className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Snippet (Description)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Snippet (Short Summary)</label>
                     <textarea
                       required
-                      rows={3}
-                      value={notebookForm.snippet}
-                      onChange={(e) => setNotebookForm({ ...notebookForm, snippet: e.target.value })}
-                      placeholder="A short abstract paragraph summarizing this thought..."
+                      rows={2}
+                      value={blogForm.snippet}
+                      onChange={(e) => setBlogForm({ ...blogForm, snippet: e.target.value })}
+                      placeholder="A short abstract paragraph summarizing the blog post..."
                       className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none resize-none"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Manifesto Quote</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Full Content (Markdown or HTML)</label>
+                    <textarea
+                      required
+                      rows={8}
+                      value={blogForm.content}
+                      onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
+                      placeholder="Write your main article content here. Supports markdown syntax..."
+                      className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Highlight Quote (Optional)</label>
                     <input
                       type="text"
-                      value={notebookForm.quote}
-                      onChange={(e) => setNotebookForm({ ...notebookForm, quote: e.target.value })}
+                      value={blogForm.quote}
+                      onChange={(e) => setBlogForm({ ...blogForm, quote: e.target.value })}
                       placeholder="“Creativity is the greatest rebellion.”"
                       className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
                     />
@@ -1275,7 +1336,7 @@ export default function AdminDashboard() {
                       type="submit"
                       className="px-4 py-2 rounded-lg bg-[#b34a26] text-white text-sm hover:bg-[#9a3d1f] font-semibold"
                     >
-                      {saving ? "Saving..." : "Save Entry"}
+                      {saving ? "Saving..." : "Save Blog Post"}
                     </button>
                   </div>
                 </form>

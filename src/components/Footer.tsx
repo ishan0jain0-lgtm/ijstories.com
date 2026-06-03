@@ -28,6 +28,7 @@ export default function Footer() {
             <h5 style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--cream)", letterSpacing: "0.1em", marginBottom: "1.25rem" }} className="uppercase">Navigations</h5>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", fontSize: "0.75rem" }}>
               <Link href="/portfolio" className="hover:text-orange">Portfolio</Link>
+              <Link href="/blog" className="hover:text-orange">Blog</Link>
               <Link href="/about" className="hover:text-orange">About us</Link>
               <Link href="/team" className="hover:text-orange">Team</Link>
             </div>

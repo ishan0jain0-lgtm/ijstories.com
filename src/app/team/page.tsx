@@ -1,35 +1,13 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import { motion } from "framer-motion";
+import React from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import TeamClient from "./TeamClient";
+import { getCachedDb } from "@/lib/db";
 
-interface TeamMember {
-  name: string;
-  role: string;
-  image: string;
-}
+export const dynamic = "force-dynamic";
 
-export default function TeamPage() {
-  const [teamMembersState, setTeamMembersState] = useState<TeamMember[]>([
-    { name: "Ishan Jain", role: "Founder", image: "/team/Ishan Jain - Founder.jpg" },
-    { name: "Rahul", role: "Video Editor & Co-Founder", image: "/team/ rahul - video editor and cofounder.jpg" },
-    { name: "Jasleen", role: "Manager", image: "/team/Jasleen - Manager.png" }
-  ]);
-
-  useEffect(() => {
-    fetch("/api/content")
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error("Content API failed");
-      })
-      .then(data => {
-        if (data.teamMembers) setTeamMembersState(data.teamMembers);
-      })
-      .catch(err => console.log("Note: Running with default team members fallback.", err));
-  }, []);
+export default async function TeamPage() {
+  const db = await getCachedDb();
 
   return (
     <div className="relative overflow-x-hidden min-h-screen bg-[#0b0a0a]">
@@ -56,34 +34,7 @@ export default function TeamPage() {
             </h2>
           </div>
 
-          <div className="team-grid">
-            {teamMembersState.map((member, idx) => (
-              <motion.div
-                key={member.name + "-" + idx}
-                className="team-card"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: idx * 0.05, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <div className="team-image-wrapper">
-                  <Image
-                    src={member.image}
-                    alt={member.name}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    style={{ objectFit: "cover" }}
-                    className="team-image"
-                  />
-                  <div className="team-overlay-glow" />
-                </div>
-                <div className="team-info">
-                  <h3 className="team-name font-syne">{member.name}</h3>
-                  <p className="team-role">{member.role}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          <TeamClient initialMembers={db.teamMembers || []} />
         </div>
       </section>
 
