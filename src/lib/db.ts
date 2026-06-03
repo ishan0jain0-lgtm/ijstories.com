@@ -75,6 +75,8 @@ export interface DatabaseSchema {
   blogPosts: BlogPost[];
   showcaseItems: ShowcaseItem[];
   leads: Lead[];
+  isFallback?: boolean;
+  dbError?: string;
 }
 
 const defaultTeamMembers: TeamMember[] = [
@@ -212,7 +214,8 @@ export async function getDb(): Promise<DatabaseSchema> {
         image: n.image || ""
       })),
       showcaseItems: showcaseItems.map((s: any) => ({ id: s.id, tag: s.tag, title: s.title, image: s.image, link: s.link, images: s.images || [], width: s.width || 800, height: s.height || 600 })),
-      leads: leads.map((l: any) => ({ id: l.id, name: l.name, email: l.email, interest: l.interest, message: l.message, timestamp: l.timestamp }))
+      leads: leads.map((l: any) => ({ id: l.id, name: l.name, email: l.email, interest: l.interest, message: l.message, timestamp: l.timestamp })),
+      isFallback: false
     };
   } catch (error) {
     console.error("Failed to fetch MongoDB database, using defaults:", error);
@@ -220,7 +223,9 @@ export async function getDb(): Promise<DatabaseSchema> {
       teamMembers: defaultTeamMembers,
       blogPosts: defaultBlogPosts,
       showcaseItems: defaultShowcaseItems,
-      leads: []
+      leads: [],
+      isFallback: true,
+      dbError: error instanceof Error ? error.message : String(error)
     };
   }
 }

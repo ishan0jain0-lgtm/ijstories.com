@@ -67,11 +67,15 @@ export default function AdminDashboard() {
     blogPosts: BlogPost[];
     showcaseItems: ShowcaseItem[];
     leads: Lead[];
+    isFallback?: boolean;
+    dbError?: string;
   }>({
     teamMembers: [],
     blogPosts: [],
     showcaseItems: [],
-    leads: []
+    leads: [],
+    isFallback: false,
+    dbError: ""
   });
 
   // ImageKit states
@@ -126,9 +130,21 @@ export default function AdminDashboard() {
       if (response.ok) {
         const data = await response.json();
         setDb(data);
+      } else {
+        const errText = await response.text();
+        setDb((prev) => ({
+          ...prev,
+          isFallback: true,
+          dbError: `Server error (${response.status}): ${errText}`
+        }));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error loading DB data:", error);
+      setDb((prev) => ({
+        ...prev,
+        isFallback: true,
+        dbError: error instanceof Error ? error.message : String(error)
+      }));
     } finally {
       setLoading(false);
     }
@@ -496,6 +512,29 @@ export default function AdminDashboard() {
           </div>
         </div>
       </header>
+
+      {/* Fallback Mode / MongoDB Connection Warning */}
+      {db.isFallback && (
+        <div className="max-w-7xl mx-auto px-6 mt-6">
+          <div className="p-4 rounded-xl border border-amber-900/30 bg-amber-950/10 text-amber-300 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <h4 className="text-sm font-bold font-syne">Database Connection Failed — Operating in Offline Mode</h4>
+            </div>
+            <p className="text-xs leading-relaxed text-amber-200/80">
+              The application could not establish a connection to your MongoDB Atlas cluster. We have gracefully fallen back to local default data. Any changes you make here will <strong>not</strong> save to the production database.
+            </p>
+            {db.dbError && (
+              <div className="mt-2 text-[11px] bg-black/40 p-3 rounded-lg border border-amber-900/20 font-mono text-amber-100/90 break-all select-text">
+                <span className="font-semibold text-amber-300">Technical Details:</span> {db.dbError}
+              </div>
+            )}
+            <p className="text-xs text-amber-300/90">
+              💡 <strong>Common Cause:</strong> Your current IP address might not be whitelisted on MongoDB Atlas. Please log in to your <a href="https://www.mongodb.com/docs/atlas/security-whitelist/" target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition-colors">MongoDB Atlas Security Whitelist</a> panel and authorize your current IP address.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Main Dashboard Layout */}
       <main className="max-w-7xl mx-auto px-6 mt-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
