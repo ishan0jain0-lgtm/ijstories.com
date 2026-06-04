@@ -1318,3 +1318,91 @@ a {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
+/* ==========================================
+   THEME LIGHT/DARK MIX & COMPONENT STYLES
+   ========================================== */
+
+.section-cream {
+  background-color: var(--light-gray);
+  color: var(--black);
+}
+
+.section-cream h1,
+.section-cream h2,
+.section-cream h3,
+.section-cream h4,
+.section-cream p,
+.section-cream span,
+.section-cream label {
+  color: var(--black);
+}
+
+/* Service Card Theme Adjustments */
+.service-card {
+  padding: 2.5rem 2rem;
+  background-color: rgba(26, 24, 23, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(217, 187, 151, 0.06);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 220px;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-smooth);
+}
+
+.service-card:hover {
+  border-color: rgba(179, 74, 38, 0.4);
+  transform: translateY(-6px);
+}
+
+.section-cream .service-card {
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(179, 74, 38, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+}
+
+.section-cream .service-card h3 {
+  color: var(--black);
+}
+
+.section-cream .service-card p {
+  color: rgba(11, 10, 10, 0.7);
+}
+
+/* Contact Card & Inputs Theme Adjustments */
+.section-cream .contact-form-card {
+  background-color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(179, 74, 38, 0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+}
+
+.section-cream .form-input-studio {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(179, 74, 38, 0.15);
+  color: var(--black);
+}
+
+.section-cream .form-input-studio:focus {
+  border-color: var(--orange);
+}
+
+.section-cream .form-input-studio::placeholder {
+  color: rgba(11, 10, 10, 0.4);
+}
+
+.section-cream .form-input-studio option {
+  background-color: #ffffff;
+  color: var(--black);
+}
+
+.section-cream .btn-submit-studio {
+  color: #ffffff;
+}
+
+.section-cream .contact-row-2col label {
+  color: rgba(11, 10, 10, 0.6);
+}

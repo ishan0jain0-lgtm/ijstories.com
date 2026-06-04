@@ -41,7 +41,7 @@ export default async function BlogPostDetailPage({ params }: BlogPostPageProps) 
             <ArrowLeft size={16} /> Return to Stories
           </Link>
         </div>
-        <Footer />
+        <Footer websiteDetails={db.websiteDetails} />
       </div>
     );
   }
@@ -126,7 +126,7 @@ export default async function BlogPostDetailPage({ params }: BlogPostPageProps) 
 
       </main>
 
-      <Footer />
+      <Footer websiteDetails={db.websiteDetails} />
     </div>
   );
 }

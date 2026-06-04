@@ -21,7 +21,7 @@ export default async function AboutPage() {
 
       <AboutClient initialBlogs={db.blogPosts || []} />
 
-      <Footer />
+      <Footer websiteDetails={db.websiteDetails} />
     </div>
   );
 }

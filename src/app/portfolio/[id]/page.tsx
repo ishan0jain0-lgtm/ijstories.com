@@ -24,7 +24,7 @@ export default async function ProjectDetailsPage({
       
       <ProjectDetailsClient project={project} />
       
-      <Footer />
+      <Footer websiteDetails={db.websiteDetails} />
     </div>
   );
 }

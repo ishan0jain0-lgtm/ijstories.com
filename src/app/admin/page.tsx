@@ -18,7 +18,8 @@ import {
   Sparkles,
   RefreshCw,
   FolderOpen,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Settings
 } from "lucide-react";
 
 interface TeamMember {
@@ -57,9 +58,20 @@ interface Lead {
   message: string;
   timestamp: string;
 }
+interface WebsiteDetails {
+  email: string;
+  hubs: string;
+  instagram: string;
+  linkedin: string;
+  twitter: string;
+  behance: string;
+  phone?: string;
+  whatsapp?: string;
+  youtube?: string;
+}
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"overview" | "leads" | "team" | "blog" | "showcase" | "imagekit">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "leads" | "team" | "blog" | "showcase" | "imagekit" | "settings">("overview");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [db, setDb] = useState<{
@@ -67,6 +79,7 @@ export default function AdminDashboard() {
     blogPosts: BlogPost[];
     showcaseItems: ShowcaseItem[];
     leads: Lead[];
+    websiteDetails: WebsiteDetails;
     isFallback?: boolean;
     dbError?: string;
   }>({
@@ -74,6 +87,17 @@ export default function AdminDashboard() {
     blogPosts: [],
     showcaseItems: [],
     leads: [],
+    websiteDetails: {
+      email: "hello@ijstories.com",
+      hubs: "Mumbai • New York • London • Berlin",
+      instagram: "https://instagram.com",
+      linkedin: "https://linkedin.com",
+      twitter: "https://twitter.com",
+      behance: "https://behance.net",
+      phone: "",
+      whatsapp: "",
+      youtube: ""
+    },
     isFallback: false,
     dbError: ""
   });
@@ -119,6 +143,18 @@ export default function AdminDashboard() {
     height: 600
   });
 
+  const [settingsForm, setSettingsForm] = useState<WebsiteDetails>({
+    email: "",
+    hubs: "",
+    instagram: "",
+    linkedin: "",
+    twitter: "",
+    behance: "",
+    phone: "",
+    whatsapp: "",
+    youtube: ""
+  });
+
   const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || "";
   const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || "";
 
@@ -130,6 +166,9 @@ export default function AdminDashboard() {
       if (response.ok) {
         const data = await response.json();
         setDb(data);
+        if (data.websiteDetails) {
+          setSettingsForm(data.websiteDetails);
+        }
       } else {
         const errText = await response.text();
         setDb((prev) => ({
@@ -570,7 +609,8 @@ export default function AdminDashboard() {
             { id: "team", label: "Team Members", icon: Users, count: db.teamMembers.length },
             { id: "blog", label: "Blog Posts", icon: BookOpen, count: db.blogPosts.length },
             { id: "showcase", label: "Showcase Grid", icon: ImageIcon, count: db.showcaseItems.length },
-            { id: "imagekit", label: "ImageKit Lab", icon: UploadCloud }
+            { id: "imagekit", label: "ImageKit Lab", icon: UploadCloud },
+            { id: "settings", label: "Website Settings", icon: Settings }
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -1258,6 +1298,131 @@ export default function AdminDashboard() {
                   )}
                 </div>
               )}
+
+              {/* Tab 7: Website Settings */}
+              {activeTab === "settings" && (
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      saveDb({ ...db, websiteDetails: settingsForm });
+                    }} className="space-y-6">
+                      <div>
+                        <h2 className="text-2xl font-bold font-syne text-white">Website Settings</h2>
+                        <p className="text-sm text-[rgba(217,187,151,0.6)] mt-1">Configure global details and metadata for I.J_Stories website.</p>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Contact Email</label>
+                            <input
+                              type="email"
+                              required
+                              value={settingsForm.email}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, email: e.target.value })}
+                              placeholder="hello@ijstories.com"
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Ecosystem Hubs (Cities)</label>
+                            <input
+                              type="text"
+                              required
+                              value={settingsForm.hubs}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, hubs: e.target.value })}
+                              placeholder="Mumbai • New York • London • Berlin"
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Phone Number</label>
+                            <input
+                              type="text"
+                              value={settingsForm.phone || ""}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, phone: e.target.value })}
+                              placeholder="+91 93113 43359"
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">WhatsApp Link</label>
+                            <input
+                              type="text"
+                              value={settingsForm.whatsapp || ""}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, whatsapp: e.target.value })}
+                              placeholder="https://api.whatsapp.com/send/?phone=..."
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none font-mono"
+                            />
+                          </div>
+                        </div>
+
+                        <h3 className="text-sm font-bold text-white border-b border-[rgba(217,187,151,0.08)] pb-2 pt-4">Social Channels</h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Instagram Link</label>
+                            <input
+                              type="text"
+                              required
+                              value={settingsForm.instagram}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, instagram: e.target.value })}
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none font-mono"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">LinkedIn Link</label>
+                            <input
+                              type="text"
+                              required
+                              value={settingsForm.linkedin}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, linkedin: e.target.value })}
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none font-mono"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Twitter Link (X)</label>
+                            <input
+                              type="text"
+                              required
+                              value={settingsForm.twitter}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, twitter: e.target.value })}
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none font-mono"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Behance Link</label>
+                            <input
+                              type="text"
+                              required
+                              value={settingsForm.behance}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, behance: e.target.value })}
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none font-mono"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">YouTube Link</label>
+                            <input
+                              type="text"
+                              value={settingsForm.youtube || ""}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, youtube: e.target.value })}
+                              placeholder="https://youtube.com/@..."
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none font-mono"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-6 border-t border-[rgba(217,187,151,0.08)] flex justify-end">
+                        <button
+                          type="submit"
+                          disabled={saving || db.isFallback}
+                          className="px-6 py-3 bg-[#b34a26] text-white hover:bg-[#9a3d1f] disabled:opacity-40 disabled:hover:bg-[#b34a26] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-[#b34a26]/20"
+                        >
+                          {saving ? "Saving Configuration..." : "Save Website Settings"}
+                        </button>
+                      </div>
+                    </form>
+                  )}
 
             </div>
           )}

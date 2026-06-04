@@ -1,8 +1,14 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { WebsiteDetails } from "@/lib/db";
 
-export default function Footer() {
+export default function Footer({ websiteDetails }: { websiteDetails?: WebsiteDetails }) {
+  const instagram = websiteDetails?.instagram || "https://instagram.com";
+  const linkedin = websiteDetails?.linkedin || "https://linkedin.com";
+  const twitter = websiteDetails?.twitter || "https://twitter.com";
+  const behance = websiteDetails?.behance || "https://behance.net";
+
   return (
     <footer style={{ padding: "4rem 0", backgroundColor: "#070606", borderTop: "1px solid rgba(217, 187, 151, 0.05)", color: "rgba(217, 187, 151, 0.4)", fontSize: "0.85rem", fontWeight: 300 }}>
       <div className="container">
@@ -23,7 +29,7 @@ export default function Footer() {
               A multidisciplinary creative ecosystem building modern brands that feel human. Designed for global impact.
             </p>
           </div>
-
+ 
           <div>
             <h5 style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--cream)", letterSpacing: "0.1em", marginBottom: "1.25rem" }} className="uppercase">Navigations</h5>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", fontSize: "0.75rem" }}>
@@ -33,7 +39,7 @@ export default function Footer() {
               <Link href="/team" className="hover:text-orange">Team</Link>
             </div>
           </div>
-
+ 
           <div>
             <h5 style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--cream)", letterSpacing: "0.1em", marginBottom: "1.25rem" }} className="uppercase">Core Ecosystem</h5>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", fontSize: "0.75rem" }}>
@@ -43,19 +49,19 @@ export default function Footer() {
               <p>Founder Branding</p>
             </div>
           </div>
-
+ 
           <div>
             <h5 style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--cream)", letterSpacing: "0.1em", marginBottom: "1.25rem" }} className="uppercase">Channels</h5>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", fontSize: "0.75rem" }}>
-              <a href="https://instagram.com" target="_blank" rel="noreferrer" className="hover:text-orange">Instagram</a>
-              <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="hover:text-orange">LinkedIn</a>
-              <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-orange">Twitter (X)</a>
-              <a href="https://behance.net" target="_blank" rel="noreferrer" className="hover:text-orange">Behance</a>
+              <a href={instagram} target="_blank" rel="noreferrer" className="hover:text-orange">Instagram</a>
+              <a href={linkedin} target="_blank" rel="noreferrer" className="hover:text-orange">LinkedIn</a>
+              <a href={twitter} target="_blank" rel="noreferrer" className="hover:text-orange">Twitter (X)</a>
+              <a href={behance} target="_blank" rel="noreferrer" className="hover:text-orange">Behance</a>
             </div>
           </div>
-
+ 
         </div>
-
+ 
         <div className="footer-bottom-flex">
           <p>© {new Date().getFullYear()} I.J_Stories Studio Network. All rights reserved.</p>
           <div style={{ display: "flex", gap: "1.5rem" }}>

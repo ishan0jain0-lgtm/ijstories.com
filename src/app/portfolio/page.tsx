@@ -21,7 +21,7 @@ export default async function PortfolioPage() {
 
       <PortfolioClient initialItems={db.showcaseItems} />
 
-      <Footer />
+      <Footer websiteDetails={db.websiteDetails} />
     </div>
   );
 }

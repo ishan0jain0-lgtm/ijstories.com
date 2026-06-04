@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     if (body.blogPosts) db.blogPosts = body.blogPosts;
     if (body.showcaseItems) db.showcaseItems = body.showcaseItems;
     if (body.leads) db.leads = body.leads;
+    if (body.websiteDetails) db.websiteDetails = body.websiteDetails;
 
     const success = await writeDb(db);
     if (!success) {

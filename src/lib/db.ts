@@ -70,11 +70,24 @@ export interface Lead {
   timestamp: string;
 }
 
+export interface WebsiteDetails {
+  email: string;
+  hubs: string;
+  instagram: string;
+  linkedin: string;
+  twitter: string;
+  behance: string;
+  phone?: string;
+  whatsapp?: string;
+  youtube?: string;
+}
+
 export interface DatabaseSchema {
   teamMembers: TeamMember[];
   blogPosts: BlogPost[];
   showcaseItems: ShowcaseItem[];
   leads: Lead[];
+  websiteDetails: WebsiteDetails;
   isFallback?: boolean;
   dbError?: string;
 }
@@ -149,7 +162,33 @@ const defaultShowcaseItems: ShowcaseItem[] = [
   }
 ];
 
+const defaultWebsiteDetails: WebsiteDetails = {
+  email: "ishanjain@ijstories.com",
+  hubs: "Mumbai • New York • London • Berlin",
+  instagram: "https://www.instagram.com/i.j_stories?igsh=aTM1d2I4b3EzdnJw&utm_source=qr",
+  linkedin: "https://linkedin.com",
+  twitter: "https://twitter.com",
+  behance: "https://behance.net",
+  phone: "+91 93113 43359",
+  whatsapp: "https://api.whatsapp.com/send/?phone=919311343359&text&type=phone_number&app_absent=0",
+  youtube: "https://www.youtube.com/@I.jstories"
+};
+
 // Mongoose Schemas
+const WebsiteDetailsSchema = new Schema({
+  email: { type: String, required: true },
+  hubs: { type: String, required: true },
+  instagram: { type: String, required: true },
+  linkedin: { type: String, required: true },
+  twitter: { type: String, required: true },
+  behance: { type: String, required: true },
+  phone: { type: String, default: "" },
+  whatsapp: { type: String, default: "" },
+  youtube: { type: String, default: "" }
+});
+
+export const WebsiteDetailsModel = models.WebsiteDetails || model("WebsiteDetails", WebsiteDetailsSchema);
+
 const TeamMemberSchema = new Schema({
   name: { type: String, required: true },
   role: { type: String, required: true },
@@ -200,6 +239,19 @@ export async function getDb(): Promise<DatabaseSchema> {
     const blogPosts = await BlogPostModel.find({}).lean();
     const showcaseItems = await ShowcaseItemModel.find({}).lean();
     const leads = await LeadModel.find({}).sort({ timestamp: -1 }).lean();
+    const websiteDetailsDoc = await WebsiteDetailsModel.findOne({}).lean();
+
+    const websiteDetails = websiteDetailsDoc ? {
+      email: (websiteDetailsDoc as any).email || defaultWebsiteDetails.email,
+      hubs: (websiteDetailsDoc as any).hubs || defaultWebsiteDetails.hubs,
+      instagram: (websiteDetailsDoc as any).instagram || defaultWebsiteDetails.instagram,
+      linkedin: (websiteDetailsDoc as any).linkedin || defaultWebsiteDetails.linkedin,
+      twitter: (websiteDetailsDoc as any).twitter || defaultWebsiteDetails.twitter,
+      behance: (websiteDetailsDoc as any).behance || defaultWebsiteDetails.behance,
+      phone: (websiteDetailsDoc as any).phone || defaultWebsiteDetails.phone || "",
+      whatsapp: (websiteDetailsDoc as any).whatsapp || defaultWebsiteDetails.whatsapp || "",
+      youtube: (websiteDetailsDoc as any).youtube || defaultWebsiteDetails.youtube || ""
+    } : defaultWebsiteDetails;
 
     return {
       teamMembers: teamMembers.map((m: any) => ({ name: m.name, role: m.role, image: m.image })),
@@ -215,6 +267,7 @@ export async function getDb(): Promise<DatabaseSchema> {
       })),
       showcaseItems: showcaseItems.map((s: any) => ({ id: s.id, tag: s.tag, title: s.title, image: s.image, link: s.link, images: s.images || [], width: s.width || 800, height: s.height || 600 })),
       leads: leads.map((l: any) => ({ id: l.id, name: l.name, email: l.email, interest: l.interest, message: l.message, timestamp: l.timestamp })),
+      websiteDetails,
       isFallback: false
     };
   } catch (error) {
@@ -224,6 +277,7 @@ export async function getDb(): Promise<DatabaseSchema> {
       blogPosts: defaultBlogPosts,
       showcaseItems: defaultShowcaseItems,
       leads: [],
+      websiteDetails: defaultWebsiteDetails,
       isFallback: true,
       dbError: error instanceof Error ? error.message : String(error)
     };
@@ -249,6 +303,10 @@ export async function writeDb(db: Partial<DatabaseSchema>): Promise<boolean> {
     if (db.leads) {
       await LeadModel.deleteMany({});
       await LeadModel.insertMany(db.leads);
+    }
+    if (db.websiteDetails) {
+      await WebsiteDetailsModel.deleteMany({});
+      await WebsiteDetailsModel.create(db.websiteDetails);
     }
     return true;
   } catch (error) {

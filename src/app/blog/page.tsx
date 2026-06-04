@@ -114,7 +114,7 @@ export default async function BlogListingPage() {
         )}
       </main>
 
-      <Footer />
+      <Footer websiteDetails={db.websiteDetails} />
     </div>
   );
 }
