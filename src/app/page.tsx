@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, Sparkles, Send, CheckCircle, HelpCircle, ChevronDown, ChevronUp } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Carousel from "@/components/ui/carousel";
 import { ShowcaseItem } from "@/lib/db";
+import { getImageUrl } from "@/lib/utils";
 
 const servicesList = [
   {
@@ -74,7 +76,7 @@ export default function Home() {
   const [showcaseItems, setShowcaseItems] = useState<ShowcaseItem[]>([]);
   const [websiteDetails, setWebsiteDetails] = useState({
     email: "ishanjain@ijstories.com",
-    hubs: "Mumbai • New York • London • Berlin",
+    hubs: "India",
     instagram: "https://www.instagram.com/i.j_stories?igsh=aTM1d2I4b3EzdnJw&utm_source=qr",
     linkedin: "https://linkedin.com",
     twitter: "https://twitter.com",
@@ -173,29 +175,45 @@ export default function Home() {
           <div className="hero-content-wrapper">
             <div className="hero-text-block">
               <motion.div
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                className="hero-logo-container"
+              >
+                <Image
+                  src="/logo.jpg"
+                  alt="I.J_Stories Logo"
+                  width={150}
+                  height={180}
+                  priority
+                  className="hero-logo-img"
+                />
+              </motion.div>
+
+              {/* <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
               >
                 <span className="creative-badge">
                   <Sparkles size={12} className="animate-pulse" /> Creative Ecosystem
                 </span>
-              </motion.div>
+              </motion.div> */}
               
               <h1 className="hero-title-main font-syne">
-                <motion.span
+                {/* <motion.span
                   style={{ display: "block", color: "var(--cream)" }}
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.8, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
                 >
                   I.J_Stories
-                </motion.span>
+                </motion.span> */}
                 <motion.span
                   style={{ display: "block", color: "var(--orange)" }}
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 >
                   Building Brands
                 </motion.span>
@@ -203,7 +221,7 @@ export default function Home() {
                   className="hero-italic-subtitle"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.3 }}
+                  transition={{ duration: 0.8, delay: 0.45 }}
                 >
                   that feel human.
                 </motion.span>
@@ -213,7 +231,7 @@ export default function Home() {
                 className="hero-description-p"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
+                transition={{ duration: 0.8, delay: 0.55 }}
               >
                 From identity to influence. Design. Strategy. Culture. Presence. We forge modern digital landscapes that blend design, storytelling, media, and human connection.
               </motion.p>
@@ -222,7 +240,7 @@ export default function Home() {
                 className="hero-buttons-container"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
+                transition={{ duration: 0.8, delay: 0.65 }}
               >
                 <Link 
                   href="#contact" 
@@ -268,7 +286,7 @@ export default function Home() {
               slides={showcaseItems.map((item) => ({
                 title: item.title,
                 button: "Explore Project",
-                src: item.image,
+                src: getImageUrl(item.image),
                 href: `/portfolio/${item.id}`
               }))} 
             />

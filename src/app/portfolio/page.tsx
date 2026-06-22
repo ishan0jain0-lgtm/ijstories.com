@@ -16,9 +16,6 @@ export default async function PortfolioPage() {
 
       <Header />
 
-      {/* Spacing for Nav clearance */}
-      <div className="pt-24" />
-
       <PortfolioClient initialItems={db.showcaseItems} />
 
       <Footer websiteDetails={db.websiteDetails} />

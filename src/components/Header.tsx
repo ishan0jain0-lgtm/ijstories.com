@@ -50,7 +50,7 @@ export default function Header() {
                 <Link 
                   key={link.href}
                   href={link.href} 
-                  className={`link-hover-effect ${isActive ? "active" : ""}`}
+                  className={`link-hover-effect ${isActive ? "active" : ""}`.trim()}
                   style={{ 
                     fontSize: "0.85rem", 
                     fontWeight: isActive ? 700 : 400, 

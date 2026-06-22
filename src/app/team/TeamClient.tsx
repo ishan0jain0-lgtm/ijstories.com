@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { getImageUrl } from "@/lib/utils";
 
 interface TeamMember {
   name: string;
@@ -24,7 +25,7 @@ export default function TeamClient({ initialMembers }: { initialMembers: TeamMem
         >
           <div className="team-image-wrapper">
             <Image
-              src={member.image}
+              src={getImageUrl(member.image)}
               alt={member.name}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

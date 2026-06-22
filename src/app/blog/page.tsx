@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, BookOpen, Sparkles } from "lucide-react";
 import { getCachedDb } from "@/lib/db";
+import { getImageUrl } from "@/lib/utils";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -67,7 +68,7 @@ export default async function BlogListingPage() {
               >
                 <Link href={`/blog/${post.id}`} className="block overflow-hidden relative aspect-video bg-neutral-900 border-b border-[rgba(217,187,151,0.04)]">
                   <Image
-                    src={post.image || "/brand_identity_mockup.png"}
+                    src={getImageUrl(post.image) || "/brand_identity_mockup.png"}
                     alt={post.title}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

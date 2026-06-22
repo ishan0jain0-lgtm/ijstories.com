@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Image as IKImage } from "@imagekit/react";
+import { getImageUrl } from "@/lib/utils";
 import {
   Trash2,
   Edit3,
@@ -19,7 +20,9 @@ import {
   RefreshCw,
   FolderOpen,
   Image as ImageIcon,
-  Settings
+  Settings,
+  Lock,
+  LogOut
 } from "lucide-react";
 
 interface TeamMember {
@@ -70,7 +73,46 @@ interface WebsiteDetails {
   youtube?: string;
 }
 
+const QueueItemPreview = ({ file }: { file: File }) => {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
+
+  if (!previewUrl) return null;
+
+  if (file.type.startsWith("video/")) {
+    return (
+      <video
+        src={previewUrl}
+        className="w-10 h-10 object-cover rounded bg-black shrink-0"
+        muted
+      />
+    );
+  }
+
+  return (
+    <img
+      src={previewUrl}
+      alt="preview"
+      className="w-10 h-10 object-cover rounded bg-black shrink-0"
+    />
+  );
+};
+
 export default function AdminDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [inputUsername, setInputUsername] = useState("");
+  const [inputPassword, setInputPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
+
   const [activeTab, setActiveTab] = useState<"overview" | "leads" | "team" | "blog" | "showcase" | "imagekit" | "settings">("overview");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -108,13 +150,15 @@ export default function AdminDashboard() {
   const [ikSubTab, setIkSubTab] = useState<"uploader" | "library">("uploader");
   const [searchQuery, setSearchQuery] = useState("");
   const [collectionFilter, setCollectionFilter] = useState("all");
+  const [modalCollectionFilter, setModalCollectionFilter] = useState("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // ImageKit Multiple Upload States
-  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploadTags, setUploadTags] = useState("");
   const [uploadCollection, setUploadCollection] = useState("");
   const [uploadQueue, setUploadQueue] = useState<Array<{
+    id: string;
+    file: File;
     name: string;
     status: "pending" | "uploading" | "success" | "error";
     progress: number;
@@ -122,12 +166,15 @@ export default function AdminDashboard() {
   }>>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Edit / Add Modal States
   const [modalType, setModalType] = useState<"team" | "blog" | "showcase" | "leadView" | null>(null);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [editIndex, setEditIndex] = useState<number>(-1);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [selectedShowcaseTags, setSelectedShowcaseTags] = useState<string[]>([]);
+  const [customTagInput, setCustomTagInput] = useState("");
 
   // Form Fields
   const [teamForm, setTeamForm] = useState({ name: "", role: "", image: "" });
@@ -205,9 +252,34 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    loadData();
-    loadMediaFiles();
-  }, []);
+    const isAuth = sessionStorage.getItem("admin-authenticated");
+    if (isAuth === "true") {
+      setIsAuthenticated(true);
+      loadData();
+      loadMediaFiles();
+    } else {
+      setIsAuthenticated(false);
+    }
+    setAuthLoading(false);
+  }, [isAuthenticated]);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (inputUsername === "admin" && inputPassword === "admin") {
+      sessionStorage.setItem("admin-authenticated", "true");
+      setIsAuthenticated(true);
+      setAuthError("");
+    } else {
+      setAuthError("Invalid username or password. Access denied.");
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("admin-authenticated");
+    setIsAuthenticated(false);
+    setInputUsername("");
+    setInputPassword("");
+  };
 
   // Save DB helper
   const saveDb = async (updatedDb: typeof db) => {
@@ -310,22 +382,53 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleTagToggle = (tag: string) => {
+    setSelectedShowcaseTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handleAddCustomTag = () => {
+    const trimmed = customTagInput.trim();
+    if (trimmed && !selectedShowcaseTags.includes(trimmed)) {
+      setSelectedShowcaseTags((prev) => [...prev, trimmed]);
+      setCustomTagInput("");
+    }
+  };
+
   const openShowcaseForm = (mode: "add" | "edit", index = -1) => {
     setModalType("showcase");
     setModalMode(mode);
     setEditIndex(index);
+    setModalCollectionFilter("all");
+    setCustomTagInput("");
     if (mode === "edit" && index >= 0) {
+      const nextImages = (db.showcaseItems[index].images || []).map((imgUrl) => {
+        if (imgUrl.startsWith("photo:") || imgUrl.startsWith("video:")) {
+          return imgUrl;
+        }
+        const matchingFile = mediaFiles.find((f) => f.url === imgUrl);
+        const isVideo = matchingFile?.fileType === "video" || imgUrl.toLowerCase().match(/\.(mp4|webm|ogg|mov|m4v)$/);
+        return `${isVideo ? "video:" : "photo:"}${imgUrl}`;
+      });
+
+      const initialTags = db.showcaseItems[index].tag
+        ? db.showcaseItems[index].tag.split(",").map(t => t.trim()).filter(Boolean)
+        : [];
+      setSelectedShowcaseTags(initialTags);
+
       setShowcaseForm({
         id: db.showcaseItems[index].id,
         tag: db.showcaseItems[index].tag,
         title: db.showcaseItems[index].title,
         image: db.showcaseItems[index].image,
         link: db.showcaseItems[index].link,
-        images: db.showcaseItems[index].images || [],
+        images: nextImages,
         width: db.showcaseItems[index].width || 800,
         height: db.showcaseItems[index].height || 600
       });
     } else {
+      setSelectedShowcaseTags([]);
       setShowcaseForm({ id: "showcase-" + (db.showcaseItems.length + 1), tag: "", title: "", image: "", link: "#", images: [], width: 800, height: 600 });
     }
   };
@@ -361,44 +464,86 @@ export default function AdminDashboard() {
 
   const handleShowcaseSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const sanitizedImages = (showcaseForm.images || []).map((imgUrl) => {
+      if (imgUrl.startsWith("photo:") || imgUrl.startsWith("video:")) {
+        return imgUrl;
+      }
+      const matchingFile = mediaFiles.find((f) => f.url === imgUrl);
+      const isVideo = matchingFile?.fileType === "video" || imgUrl.toLowerCase().match(/\.(mp4|webm|ogg|mov|m4v)$/);
+      return `${isVideo ? "video:" : "photo:"}${imgUrl}`;
+    });
+
+    const sanitizedForm = {
+      ...showcaseForm,
+      tag: selectedShowcaseTags.join(", "),
+      images: sanitizedImages
+    };
+
     const nextShowcases = [...db.showcaseItems];
     if (modalMode === "edit") {
-      nextShowcases[editIndex] = showcaseForm;
+      nextShowcases[editIndex] = sanitizedForm;
     } else {
-      nextShowcases.push(showcaseForm);
+      nextShowcases.push(sanitizedForm);
     }
     saveDb({ ...db, showcaseItems: nextShowcases });
     setModalType(null);
   };
 
   // ImageKit client-side uploader
+  const addFilesToQueue = (files: File[]) => {
+    const newItems = files.map((file) => {
+      const isTooLarge = file.size > 104857600; // 100 MB
+      return {
+        id: file.name + "-" + Date.now() + "-" + Math.random().toString(36).substr(2, 5),
+        file: file,
+        name: file.name,
+        status: isTooLarge ? ("error" as const) : ("pending" as const),
+        error: isTooLarge ? "Exceeds ImageKit limit (100 MB max)" : undefined,
+        progress: 0
+      };
+    });
+    setUploadQueue((prev) => [...prev, ...newItems]);
+  };
+
   const handleMultipleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const selected = Array.from(e.target.files);
-      setUploadFiles((prev) => [...prev, ...selected]);
-      
-      const newItems = selected.map((file) => ({
-        name: file.name,
-        status: "pending" as const,
-        progress: 0
-      }));
-      setUploadQueue((prev) => [...prev, ...newItems]);
+      addFilesToQueue(Array.from(e.target.files));
     }
   };
 
-  const removeFileFromQueue = (index: number) => {
-    setUploadFiles((prev) => prev.filter((_, i) => i !== index));
-    setUploadQueue((prev) => prev.filter((_, i) => i !== index));
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      addFilesToQueue(Array.from(e.dataTransfer.files));
+    }
+  };
+
+  const removeFileFromQueue = (id: string) => {
+    setUploadQueue((prev) => prev.filter((item) => item.id !== id));
   };
 
   const clearQueue = () => {
-    setUploadFiles([]);
     setUploadQueue([]);
   };
 
   const handleMultipleUpload = async () => {
-    if (uploadFiles.length === 0) {
-      alert("Please select files first");
+    const pendingItems = uploadQueue.filter(item => item.status === "pending" || item.status === "error");
+    if (pendingItems.length === 0) {
+      alert("No pending files to upload");
       return;
     }
 
@@ -416,16 +561,11 @@ export default function AdminDashboard() {
     }
 
     // Process files sequentially
-    for (let i = 0; i < uploadFiles.length; i++) {
-      const file = uploadFiles[i];
-      
+    for (const item of pendingItems) {
       // Update queue state: uploading
-      setUploadQueue((prev) => {
-        const next = [...prev];
-        next[i].status = "uploading";
-        next[i].progress = 10;
-        return next;
-      });
+      setUploadQueue((prev) =>
+        prev.map((q) => (q.id === item.id ? { ...q, status: "uploading", progress: 10 } : q))
+      );
 
       try {
         const authRes = await fetch("/api/imagekit-auth", { cache: "no-store" });
@@ -434,11 +574,9 @@ export default function AdminDashboard() {
         }
         const auth = await authRes.json();
 
-        setUploadQueue((prev) => {
-          const next = [...prev];
-          next[i].progress = 30;
-          return next;
-        });
+        setUploadQueue((prev) =>
+          prev.map((q) => (q.id === item.id ? { ...q, progress: 30 } : q))
+        );
 
         // Parse tags
         const tagsArr = uploadTags
@@ -456,9 +594,9 @@ export default function AdminDashboard() {
           });
         }
 
-        const result = await uploadFn({
-          file: file,
-          fileName: file.name,
+        await uploadFn({
+          file: item.file,
+          fileName: item.file.name,
           publicKey: auth.publicKey,
           signature: auth.signature,
           token: auth.token,
@@ -467,33 +605,24 @@ export default function AdminDashboard() {
           tags: tagsArr,
           onProgress: (event: any) => {
             const percentage = Math.round((event.loaded / event.total) * 100);
-            setUploadQueue((prev) => {
-              const next = [...prev];
-              next[i].progress = 30 + percentage * 0.7;
-              return next;
-            });
+            setUploadQueue((prev) =>
+              prev.map((q) => (q.id === item.id ? { ...q, progress: 30 + percentage * 0.7 } : q))
+            );
           }
         });
 
-        setUploadQueue((prev) => {
-          const next = [...prev];
-          next[i].status = "success";
-          next[i].progress = 100;
-          return next;
-        });
+        setUploadQueue((prev) =>
+          prev.map((q) => (q.id === item.id ? { ...q, status: "success", progress: 100 } : q))
+        );
       } catch (err: any) {
-        console.error(`Failed to upload ${file.name}:`, err);
-        setUploadQueue((prev) => {
-          const next = [...prev];
-          next[i].status = "error";
-          next[i].error = err.message || "Unknown error";
-          return next;
-        });
+        console.error(`Failed to upload ${item.name}:`, err);
+        setUploadQueue((prev) =>
+          prev.map((q) => (q.id === item.id ? { ...q, status: "error", error: err.message || "Unknown error" } : q))
+        );
       }
     }
 
     setUploading(false);
-    setUploadFiles([]); // clear successfully completed files from selection list
     loadMediaFiles(); // reload
     alert("Media assets upload transmission finished!");
   };
@@ -517,11 +646,153 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleToggleSelectFile = (fileId: string) => {
+    setSelectedFileIds((prev) =>
+      prev.includes(fileId) ? prev.filter((id) => id !== fileId) : [...prev, fileId]
+    );
+  };
+
+  const handleSelectAllFiles = (filesOnPage: any[]) => {
+    const fileIdsOnPage = filesOnPage.map((f) => f.fileId);
+    const allSelected = fileIdsOnPage.every((id) => selectedFileIds.includes(id));
+    if (allSelected) {
+      setSelectedFileIds((prev) => prev.filter((id) => !fileIdsOnPage.includes(id)));
+    } else {
+      setSelectedFileIds((prev) => {
+        const next = [...prev];
+        fileIdsOnPage.forEach((id) => {
+          if (!next.includes(id)) next.push(id);
+        });
+        return next;
+      });
+    }
+  };
+
+  const handleBulkDeleteMediaFiles = async () => {
+    if (selectedFileIds.length === 0) return;
+    if (confirm(`Are you sure you want to delete the ${selectedFileIds.length} selected assets from ImageKit? This cannot be undone.`)) {
+      setLoadingMedia(true);
+      try {
+        const res = await fetch("/api/imagekit-files", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ fileIds: selectedFileIds })
+        });
+        if (res.ok) {
+          alert("Selected files deleted successfully!");
+          setSelectedFileIds([]);
+          loadMediaFiles();
+        } else {
+          const data = await res.json();
+          alert(`Delete failed: ${data.error || "Unknown error"}`);
+        }
+      } catch (e: any) {
+        alert(`Delete error: ${e.message}`);
+      } finally {
+        setLoadingMedia(false);
+      }
+    }
+  };
+
   const copyToClipboard = (url: string, id: string) => {
     navigator.clipboard.writeText(url);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#0b0a0a] text-[#d9bb97] flex flex-col items-center justify-center font-sans">
+        <RefreshCw className="animate-spin text-[#b34a26] mb-4" size={32} />
+        <p className="text-sm text-[rgba(217,187,151,0.5)] font-syne animate-pulse">Authenticating admin portal access...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0b0a0a] text-[#d9bb97] font-sans selection:bg-[#b34a26] selection:text-white flex items-center justify-center relative overflow-hidden">
+        {/* Background ambient light */}
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#b34a26] rounded-full blur-[200px] opacity-15 pointer-events-none" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#b34a26] rounded-full blur-[200px] opacity-10 pointer-events-none" />
+        <div className="grid-bg" style={{ opacity: 0.5 }} />
+        <div className="noise-overlay" />
+
+        <div className="relative z-10 w-full max-w-md mx-auto px-6">
+          <div className="border border-[rgba(217,187,151,0.12)] bg-[rgba(18,17,17,0.85)] backdrop-blur-md p-8 rounded-2xl shadow-2xl flex flex-col gap-6">
+            
+            {/* Header Section */}
+            <div className="text-center space-y-2">
+              <div className="mx-auto w-12 h-12 rounded-full bg-[rgba(179,74,38,0.1)] border border-[rgba(179,74,38,0.2)] flex items-center justify-center text-[#b34a26] mb-3">
+                <Lock size={20} />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight text-white font-syne flex items-center justify-center gap-2">
+                Restricted Access
+              </h1>
+              <p className="text-xs text-[rgba(217,187,151,0.6)] font-light leading-relaxed">
+                Please enter the required authorization credentials to manage the I.J_Stories ecosystem.
+              </p>
+            </div>
+
+            {/* Login Form */}
+            <form onSubmit={handleLogin} className="space-y-4">
+              {authError && (
+                <div className="p-3.5 rounded-lg border border-red-900/30 bg-red-950/20 text-red-400 text-xs text-center font-medium">
+                  {authError}
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <label htmlFor="username" className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  required
+                  value={inputUsername}
+                  onChange={(e) => setInputUsername(e.target.value)}
+                  placeholder="admin"
+                  className="w-full p-3 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none transition-all placeholder:text-[rgba(217,187,151,0.2)]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label htmlFor="password" className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  required
+                  value={inputPassword}
+                  onChange={(e) => setInputPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full p-3 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none transition-all placeholder:text-[rgba(217,187,151,0.2)]"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-[#b34a26] hover:bg-[#9a3d1f] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-[#b34a26]/20 mt-2"
+              >
+                Authenticate Portal
+              </button>
+            </form>
+
+            {/* Footer Manifest Info */}
+            <div className="text-center pt-2">
+              <Link href="/" className="text-[10px] uppercase tracking-wider text-[rgba(217,187,151,0.4)] hover:text-[#b34a26] transition-all font-syne">
+                ← Return to Studio landing
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0b0a0a] text-[#d9bb97] font-sans selection:bg-[#b34a26] selection:text-white pb-12">
@@ -571,6 +842,12 @@ export default function AdminDashboard() {
             <span className="text-xs px-2.5 py-1 rounded-full bg-[rgba(179,74,38,0.1)] border border-[rgba(179,74,38,0.2)] text-[#b34a26] font-semibold">
               Admin Portal
             </span>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[rgba(217,187,151,0.15)] bg-red-950/10 hover:bg-red-950/30 text-red-400 hover:text-red-300 transition-all text-xs font-semibold cursor-pointer"
+            >
+              <LogOut size={12} /> Logout
+            </button>
           </div>
         </div>
       </header>
@@ -823,7 +1100,7 @@ export default function AdminDashboard() {
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[rgba(0,0,0,0.2)] border border-[rgba(217,187,151,0.1)] shrink-0">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={member.image} alt={member.name} className="w-full h-full object-cover" onError={(e) => {
+                            <img src={getImageUrl(member.image)} alt={member.name} className="w-full h-full object-cover" onError={(e) => {
                               (e.target as HTMLImageElement).src = "/logo.jpg";
                             }} />
                           </div>
@@ -930,7 +1207,7 @@ export default function AdminDashboard() {
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-[rgba(0,0,0,0.2)] border border-[rgba(217,187,151,0.15)] shrink-0">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" onError={(e) => {
+                            <img src={getImageUrl(item.image)} alt={item.title} className="w-full h-full object-cover" onError={(e) => {
                               (e.target as HTMLImageElement).src = "/brand_identity_mockup.png";
                             }} />
                           </div>
@@ -1060,41 +1337,45 @@ export default function AdminDashboard() {
                             <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Select Portfolio Assets</label>
                             <div
                               onClick={() => fileInputRef.current?.click()}
-                              className="border-2 border-dashed border-[rgba(217,187,151,0.15)] bg-black/25 hover:bg-black/35 hover:border-[#b34a26]/40 cursor-pointer rounded-xl p-8 text-center transition-all space-y-2"
+                              onDragOver={handleDragOver}
+                              onDragLeave={handleDragLeave}
+                              onDrop={handleDrop}
+                              className={`border-2 border-dashed bg-black/25 hover:bg-black/35 cursor-pointer rounded-xl p-8 text-center transition-all space-y-2 ${
+                                isDragging ? "border-[#b34a26] bg-[#b34a26]/10" : "border-[rgba(217,187,151,0.15)] hover:border-[#b34a26]/40"
+                              }`}
                             >
-                              <UploadCloud size={36} className="mx-auto text-[rgba(217,187,151,0.4)]" />
+                              <UploadCloud size={36} className={`mx-auto transition-colors ${isDragging ? "text-[#b34a26]" : "text-[rgba(217,187,151,0.4)]"}`} />
                               <p className="text-xs text-[rgba(217,187,151,0.7)] font-medium">Drag & drop files or click to browse</p>
-                              <p className="text-[10px] text-[rgba(217,187,151,0.4)]">Supports JPEG, PNG, WebP, SVG, and GIF</p>
+                              <p className="text-[10px] text-[rgba(217,187,151,0.4)]">Supports Images & Videos (JPEG, PNG, WebP, MP4, etc. - Max 100 MB per file)</p>
                             </div>
                             <input
                               type="file"
                               ref={fileInputRef}
                               onChange={handleMultipleFileChange}
                               className="hidden"
-                              accept="image/*"
+                              accept="image/*,video/*"
                               multiple
                             />
-                          </div>
-
-                          {uploadFiles.length > 0 && (
+                               {uploadQueue.length > 0 && (
                             <div className="flex gap-2">
                               <button
                                 onClick={handleMultipleUpload}
-                                disabled={uploading}
-                                className="flex-1 py-3 bg-[#b34a26] hover:bg-[#9a3d1f] disabled:opacity-40 disabled:hover:bg-[#b34a26] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-[#b34a26]/20"
+                                disabled={uploading || uploadQueue.filter(item => item.status === "pending" || item.status === "error").length === 0}
+                                className="flex-1 py-3 bg-[#b34a26] hover:bg-[#9a3d1f] disabled:opacity-40 disabled:hover:bg-[#b34a26] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-[#b34a26]/20 cursor-pointer"
                               >
-                                {uploading ? "Transmitting Media..." : `Transmit ${uploadFiles.length} Assets to ImageKit`}
+                                {uploading ? "Transmitting Media..." : `Transmit ${uploadQueue.filter(item => item.status === "pending" || item.status === "error").length} Assets to ImageKit`}
                               </button>
                               <button
                                 onClick={clearQueue}
                                 disabled={uploading}
-                                className="px-4 py-3 border border-[rgba(217,187,151,0.15)] hover:bg-white/5 disabled:opacity-40 rounded-xl transition-all text-xs font-bold uppercase text-[rgba(217,187,151,0.7)]"
+                                className="px-4 py-3 border border-[rgba(217,187,151,0.15)] hover:bg-white/5 disabled:opacity-40 rounded-xl transition-all text-xs font-bold uppercase text-[rgba(217,187,151,0.7)] cursor-pointer"
                               >
-                                Clear
+                                  Clear
                               </button>
                             </div>
                           )}
                         </div>
+                      </div>
 
                         {/* Files and Progress Queue Visualization */}
                         <div className="space-y-4">
@@ -1107,8 +1388,9 @@ export default function AdminDashboard() {
                             </div>
                           ) : (
                             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                              {uploadQueue.map((item, idx) => (
-                                <div key={idx} className="p-3 bg-black/30 rounded-xl border border-[rgba(217,187,151,0.06)] flex items-center justify-between gap-3 text-xs">
+                              {uploadQueue.map((item) => (
+                                <div key={item.id} className="p-3 bg-black/30 rounded-xl border border-[rgba(217,187,151,0.06)] flex items-center justify-between gap-3 text-xs">
+                                  <QueueItemPreview file={item.file} />
                                   <div className="min-w-0 flex-1 space-y-1">
                                     <div className="flex justify-between items-center gap-2">
                                       <p className="font-semibold text-white truncate max-w-[180px]" title={item.name}>{item.name}</p>
@@ -1132,14 +1414,14 @@ export default function AdminDashboard() {
                                       </div>
                                     )}
                                     {item.status === "error" && (
-                                      <p className="text-[10px] text-red-400 truncate">{item.error || "Upload failed"}</p>
+                                      <p className="text-[10px] text-red-400 whitespace-normal mt-1 leading-normal" title={item.error}>{item.error || "Upload failed"}</p>
                                     )}
                                   </div>
                                   
                                   {item.status === "pending" && (
                                     <button
-                                      onClick={() => removeFileFromQueue(idx)}
-                                      className="p-1 rounded text-red-400 hover:bg-red-950/20 transition-all shrink-0"
+                                      onClick={() => removeFileFromQueue(item.id)}
+                                      className="p-1 rounded text-red-400 hover:bg-red-950/20 transition-all shrink-0 cursor-pointer"
                                     >
                                       <Trash2 size={12} />
                                     </button>
@@ -1202,6 +1484,52 @@ export default function AdminDashboard() {
                         </div>
                       ) : (
                         <>
+                          {/* Bulk Actions Bar */}
+                          {mediaFiles.length > 0 && (
+                            <div className="flex items-center justify-between bg-[rgba(179,74,38,0.05)] border border-[rgba(179,74,38,0.15)] p-3 rounded-xl mb-4">
+                              <div className="flex items-center gap-4">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const filesOnPage = mediaFiles.filter((file: any) => {
+                                      const nameMatch = file.name.toLowerCase().includes(searchQuery.toLowerCase());
+                                      const tagsMatch = file.tags?.some((t: string) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+                                      const matchesSearch = searchQuery === "" || nameMatch || tagsMatch;
+                                      const hasCollectionTag = file.tags?.some((t: string) => t === `collection:${collectionFilter}`);
+                                      const matchesCollection = collectionFilter === "all" || hasCollectionTag;
+                                      return matchesSearch && matchesCollection;
+                                    });
+                                    handleSelectAllFiles(filesOnPage);
+                                  }}
+                                  className="text-xs font-semibold px-3 py-1.5 rounded bg-[rgba(255,255,255,0.02)] border border-[rgba(217,187,151,0.15)] hover:bg-white/5 transition-all cursor-pointer"
+                                >
+                                  {mediaFiles.filter((file: any) => {
+                                    const nameMatch = file.name.toLowerCase().includes(searchQuery.toLowerCase());
+                                    const tagsMatch = file.tags?.some((t: string) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+                                    const matchesSearch = searchQuery === "" || nameMatch || tagsMatch;
+                                    const hasCollectionTag = file.tags?.some((t: string) => t === `collection:${collectionFilter}`);
+                                    const matchesCollection = collectionFilter === "all" || hasCollectionTag;
+                                    return matchesSearch && matchesCollection;
+                                  }).every((f: any) => selectedFileIds.includes(f.fileId)) ? "Deselect All" : "Select All"}
+                                </button>
+                                {selectedFileIds.length > 0 && (
+                                  <span className="text-xs text-[rgba(217,187,151,0.7)] font-medium">
+                                    {selectedFileIds.length} item{selectedFileIds.length > 1 ? "s" : ""} selected
+                                  </span>
+                                )}
+                              </div>
+                              {selectedFileIds.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={handleBulkDeleteMediaFiles}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-950/20 bg-red-950/20 hover:bg-red-950/40 text-red-400 hover:text-red-300 transition-all text-xs font-semibold cursor-pointer"
+                                >
+                                  <Trash2 size={12} /> Delete Selected ({selectedFileIds.length})
+                                </button>
+                              )}
+                            </div>
+                          )}
+
                           {/* Library Grid */}
                           {mediaFiles.length === 0 ? (
                             <div className="text-center py-16 border border-dashed border-[rgba(217,187,151,0.15)] rounded-xl">
@@ -1226,12 +1554,26 @@ export default function AdminDashboard() {
                                 .map((file: any) => (
                                   <div
                                     key={file.fileId}
-                                    className="group relative border border-[rgba(217,187,151,0.08)] bg-black/20 hover:border-[#b34a26]/40 p-2.5 rounded-xl transition-all space-y-2 flex flex-col justify-between"
+                                    className={`group relative border p-2.5 rounded-xl transition-all space-y-2 flex flex-col justify-between ${
+                                      selectedFileIds.includes(file.fileId)
+                                        ? "border-[#b34a26] bg-[rgba(179,74,38,0.04)]"
+                                        : "border-[rgba(217,187,151,0.08)] bg-black/20 hover:border-[#b34a26]/40"
+                                    }`}
                                   >
                                     <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-neutral-900 flex items-center justify-center border border-[rgba(217,187,151,0.04)]">
+                                      {/* Selection Checkbox */}
+                                      <div className="absolute top-2 left-2 z-20">
+                                        <input
+                                          type="checkbox"
+                                          checked={selectedFileIds.includes(file.fileId)}
+                                          onChange={() => handleToggleSelectFile(file.fileId)}
+                                          className="w-4 h-4 rounded border-[rgba(217,187,151,0.3)] bg-black/60 checked:bg-[#b34a26] text-[#b34a26] focus:ring-0 cursor-pointer accent-[#b34a26] transition-all"
+                                        />
+                                      </div>
+
                                       {/* eslint-disable-next-line @next/next/no-img-element */}
                                       <img
-                                        src={file.thumbnailUrl || file.url}
+                                        src={file.thumbnail || file.url}
                                         alt={file.name}
                                         className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                                       />
@@ -1239,14 +1581,16 @@ export default function AdminDashboard() {
                                       {/* Floating Quick Action Overlay */}
                                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                         <button
+                                          type="button"
                                           onClick={() => copyToClipboard(file.url, file.fileId)}
                                           className="p-2 rounded bg-black/70 text-white hover:text-[#d9bb97] transition-all text-xs font-semibold flex items-center gap-1.5"
                                         >
                                           {copiedId === file.fileId ? "Copied!" : "Copy Link"}
                                         </button>
                                         <button
+                                          type="button"
                                           onClick={() => handleDeleteMediaFile(file.fileId)}
-                                          className="p-2 rounded bg-red-950/80 text-red-300 hover:text-red-200 transition-all"
+                                          className="p-2 rounded bg-red-950/80 text-red-300 hover:text-red-200 transition-all cursor-pointer"
                                           title="Delete asset"
                                         >
                                           <Trash2 size={14} />
@@ -1432,7 +1776,7 @@ export default function AdminDashboard() {
         {/* Global Modals for Forms */}
         {modalType && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-            <div className="relative border border-[rgba(217,187,151,0.15)] bg-[#121111] p-6 rounded-2xl w-full max-w-lg shadow-2xl my-8">
+            <div className="relative border border-[rgba(217,187,151,0.15)] bg-[#121111] p-6 rounded-2xl w-full max-w-lg shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
               
               {/* Team Form Modal */}
               {modalType === "team" && (
@@ -1600,15 +1944,98 @@ export default function AdminDashboard() {
                   </h3>
                   
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Tag</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Showcase ID (URL Slug)</label>
                     <input
                       type="text"
                       required
-                      value={showcaseForm.tag}
-                      onChange={(e) => setShowcaseForm({ ...showcaseForm, tag: e.target.value })}
-                      placeholder="Visual Identity"
-                      className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
+                      value={showcaseForm.id}
+                      onChange={(e) => {
+                        const val = e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, "-").replace(/-+/g, "-");
+                        setShowcaseForm({ ...showcaseForm, id: val });
+                      }}
+                      placeholder="minimalist-brand-book"
+                      className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none font-mono"
                     />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">
+                      Select Tags
+                    </label>
+                    
+                    {/* Existing tags list */}
+                    <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto p-2 rounded-lg border border-[rgba(217,187,151,0.08)] bg-black/30">
+                      {Array.from(new Set(db.showcaseItems.flatMap(item => item.tag ? item.tag.split(",").map(t => t.trim()) : []).filter(Boolean))).length === 0 ? (
+                        <p className="text-xs text-[rgba(217,187,151,0.4)] italic">No tags created yet. Create a custom tag below.</p>
+                      ) : (
+                        Array.from(new Set(db.showcaseItems.flatMap(item => item.tag ? item.tag.split(",").map(t => t.trim()) : []).filter(Boolean))).map((t) => {
+                          const isSelected = selectedShowcaseTags.includes(t);
+                          return (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() => handleTagToggle(t)}
+                              className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-200 flex items-center gap-1.5 cursor-pointer font-medium ${
+                                isSelected
+                                  ? "bg-[#b34a26] text-white border-[#b34a26] shadow-sm shadow-[#b34a26]/20"
+                                  : "bg-[rgba(255,255,255,0.02)] text-[rgba(217,187,151,0.7)] border-[rgba(217,187,151,0.08)] hover:bg-[rgba(217,187,151,0.06)] hover:text-white"
+                              }`}
+                            >
+                              {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+                              {t}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    {/* Create custom tag inline */}
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={customTagInput}
+                        onChange={(e) => setCustomTagInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddCustomTag();
+                          }
+                        }}
+                        placeholder="Create custom tag..."
+                        className="flex-1 p-2 rounded-lg border border-[rgba(217,187,151,0.1)] bg-[#121111] text-white text-xs focus:border-[#b34a26] focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddCustomTag}
+                        className="px-3 py-2 bg-[rgba(179,74,38,0.1)] border border-[rgba(179,74,38,0.3)] hover:bg-[#b34a26] hover:text-white rounded-lg text-xs font-semibold text-[#b34a26] transition-all"
+                      >
+                        Add Tag
+                      </button>
+                    </div>
+
+                    {/* Selected tags summary */}
+                    {selectedShowcaseTags.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.4)] mr-1">
+                          Active Selection:
+                        </span>
+                        {selectedShowcaseTags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-flex items-center gap-1 text-[10px] font-bold bg-[#b34a26]/10 text-[#b34a26] border border-[#b34a26]/20 px-2 py-0.5 rounded animate-fadeIn"
+                          >
+                            {tag}
+                            <button
+                              type="button"
+                              onClick={() => handleTagToggle(tag)}
+                              className="hover:text-red-400 font-extrabold text-[9px] pl-0.5 cursor-pointer"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-1">
@@ -1617,7 +2044,14 @@ export default function AdminDashboard() {
                       type="text"
                       required
                       value={showcaseForm.title}
-                      onChange={(e) => setShowcaseForm({ ...showcaseForm, title: e.target.value })}
+                      onChange={(e) => {
+                        const newTitle = e.target.value;
+                        const updates: Partial<typeof showcaseForm> = { title: newTitle };
+                        if (modalMode === "add") {
+                          updates.id = newTitle.toLowerCase().replace(/[^a-z0-9-_]/g, "-").replace(/-+/g, "-");
+                        }
+                        setShowcaseForm({ ...showcaseForm, ...updates });
+                      }}
                       placeholder="Minimalist brand book"
                       className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
                     />
@@ -1637,7 +2071,13 @@ export default function AdminDashboard() {
                       <div className="mt-1.5">
                         <span className="text-[9px] text-[rgba(217,187,151,0.5)] font-semibold block mb-1">Quick Select Cover (Applies Metadata Dimensions):</span>
                         <div className="flex gap-1.5 overflow-x-auto py-1 max-w-full no-scrollbar">
-                          {mediaFiles.slice(0, 10).map((file) => (
+                          {mediaFiles
+                            .filter((file) => {
+                              if (modalCollectionFilter === "all") return true;
+                              return file.tags?.includes(`collection:${modalCollectionFilter}`);
+                            })
+                            .slice(0, 10)
+                            .map((file) => (
                             <button
                               key={file.fileId}
                               type="button"
@@ -1653,7 +2093,7 @@ export default function AdminDashboard() {
                               title={`${file.name} (${file.width}x${file.height})`}
                             >
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={file.thumbnailUrl || file.url} alt={file.name} className="w-full h-full object-cover" />
+                              <img src={file.thumbnail || file.url} alt={file.name} className="w-full h-full object-cover" />
                             </button>
                           ))}
                         </div>
@@ -1704,22 +2144,81 @@ export default function AdminDashboard() {
                       Grouped Portfolio Images (ImageKit Library)
                     </label>
                     <p className="text-[10px] text-[rgba(217,187,151,0.4)] mb-1">
-                      Check which uploaded assets belong to this project's carousel gallery.
+                      Check which uploaded assets belong to this project's gallery.
                     </p>
                     {mediaFiles.length === 0 ? (
                       <p className="text-xs italic text-[rgba(217,187,151,0.4)] py-2">No assets found. Upload files in the ImageKit Lab first.</p>
                     ) : (
-                      <div className="grid grid-cols-4 gap-2 max-h-36 overflow-y-auto p-1.5 bg-black/40 rounded-xl border border-[rgba(217,187,151,0.08)]">
-                        {mediaFiles.map((file) => {
-                          const isChecked = showcaseForm.images?.includes(file.url);
+                      <>
+                        <div className="flex gap-2 items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <label className="text-[9px] font-semibold text-[rgba(217,187,151,0.5)]">Filter by Collection:</label>
+                            <select
+                              value={modalCollectionFilter}
+                              onChange={(e) => setModalCollectionFilter(e.target.value)}
+                              className="p-1 text-[10px] rounded bg-[#121111] border border-[rgba(217,187,151,0.15)] text-white focus:outline-none"
+                            >
+                              <option value="all">All Collections</option>
+                              {Array.from(
+                                new Set(
+                                  mediaFiles
+                                    .flatMap((file: any) => file.tags || [])
+                                    .filter((tag: string) => tag.startsWith("collection:"))
+                                    .map((tag: string) => tag.replace("collection:", ""))
+                                )
+                              ).map((coll: any) => (
+                                <option key={coll} value={coll}>{coll}</option>
+                              ))}
+                            </select>
+                          </div>
+                          {modalCollectionFilter !== "all" && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const filesInCollection = mediaFiles.filter((file) =>
+                                  file.tags?.includes(`collection:${modalCollectionFilter}`)
+                                );
+                                const currentImages = showcaseForm.images || [];
+                                const newImages = [...currentImages];
+                                filesInCollection.forEach((file) => {
+                                  const exists = newImages.some(
+                                    (img) => img === file.url || img === `photo:${file.url}` || img === `video:${file.url}`
+                                  );
+                                  if (!exists) {
+                                    newImages.push(`${file.fileType === "video" ? "video:" : "photo:"}${file.url}`);
+                                  }
+                                });
+                                setShowcaseForm({ ...showcaseForm, images: newImages });
+                              }}
+                              className="px-2 py-1 bg-[#b34a26]/20 border border-[#b34a26]/40 hover:bg-[#b34a26]/30 text-white rounded text-[9px] font-bold uppercase transition-all"
+                            >
+                              Select All from "{modalCollectionFilter}"
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-4 gap-2 max-h-36 overflow-y-auto p-1.5 bg-black/40 rounded-xl border border-[rgba(217,187,151,0.08)]">
+                          {mediaFiles
+                            .filter((file) => {
+                              if (modalCollectionFilter === "all") return true;
+                              return file.tags?.includes(`collection:${modalCollectionFilter}`);
+                            })
+                            .map((file) => {
+                          const isChecked = showcaseForm.images?.some(
+                            (img) => img === file.url || img === `photo:${file.url}` || img === `video:${file.url}`
+                          );
                           return (
                             <div
                               key={file.fileId}
                               onClick={() => {
                                 const currentImages = showcaseForm.images || [];
                                 const nextImages = isChecked
-                                  ? currentImages.filter((url) => url !== file.url)
-                                  : [...currentImages, file.url];
+                                  ? currentImages.filter(
+                                      (img) =>
+                                        img !== file.url &&
+                                        img !== `photo:${file.url}` &&
+                                        img !== `video:${file.url}`
+                                    )
+                                  : [...currentImages, `${file.fileType === "video" ? "video:" : "photo:"}${file.url}`];
                                 setShowcaseForm({ ...showcaseForm, images: nextImages });
                               }}
                               className={`relative aspect-square cursor-pointer rounded-lg overflow-hidden border transition-all ${
@@ -1729,7 +2228,7 @@ export default function AdminDashboard() {
                               }`}
                             >
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={file.thumbnailUrl || file.url} alt={file.name} className="w-full h-full object-cover" />
+                              <img src={file.thumbnail || file.url} alt={file.name} className="w-full h-full object-cover" />
                               <div className="absolute inset-x-0 bottom-0 bg-black/60 p-0.5 text-center text-[7px] text-[rgba(217,187,151,0.8)] truncate">
                                 {file.name}
                               </div>
@@ -1742,8 +2241,57 @@ export default function AdminDashboard() {
                           );
                         })}
                       </div>
+                      </>
                     )}
                   </div>
+
+                  {/* Selected Images Tagging Manager */}
+                  {showcaseForm.images && showcaseForm.images.length > 0 && (
+                    <div className="space-y-2 border-t border-[rgba(217,187,151,0.08)] pt-4">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)] block">
+                        Media Types Tagging
+                      </label>
+                      <p className="text-[10px] text-[rgba(217,187,151,0.4)] mb-1">
+                        Select whether each grouped asset is a Photo or a Video.
+                      </p>
+                      <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                        {showcaseForm.images.map((imgUrlWithTag, idx) => {
+                          const isVideo = imgUrlWithTag.startsWith("video:");
+                          const isPhoto = imgUrlWithTag.startsWith("photo:");
+                          const url = isVideo ? imgUrlWithTag.substring(6) : (isPhoto ? imgUrlWithTag.substring(6) : imgUrlWithTag);
+                          
+                          const matchingFile = mediaFiles.find((f) => f.url === url);
+                          const isVideoUrl = url.toLowerCase().match(/\.(mp4|webm|ogg|mov|m4v)$/);
+                          const detectedType = (matchingFile?.fileType === "video" || isVideoUrl) ? "video" : "photo";
+                          const currentTag = isVideo ? "video" : (isPhoto ? "photo" : detectedType);
+                          const filename = url.substring(url.lastIndexOf("/") + 1);
+
+                          return (
+                            <div key={idx} className="flex items-center justify-between gap-3 p-2 bg-black/30 rounded-lg border border-[rgba(217,187,151,0.05)]">
+                              <div className="flex items-center gap-2 min-w-0">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={matchingFile?.thumbnail || getImageUrl(url)} alt={filename} className="w-8 h-8 rounded object-cover border border-[rgba(217,187,151,0.15)] shrink-0" />
+                                <span className="text-[10px] text-white truncate max-w-[150px] font-mono">{filename}</span>
+                              </div>
+                              <select
+                                value={currentTag}
+                                onChange={(e) => {
+                                  const newTag = e.target.value;
+                                  const nextImages = [...showcaseForm.images];
+                                  nextImages[idx] = `${newTag}:${url}`;
+                                  setShowcaseForm({ ...showcaseForm, images: nextImages });
+                                }}
+                                className="p-1 text-[10px] rounded bg-[#121111] border border-[rgba(217,187,151,0.15)] text-white focus:outline-none"
+                              >
+                                <option value="photo">Photo</option>
+                                <option value="video">Video</option>
+                              </select>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex gap-3 justify-end pt-4 border-t border-[rgba(217,187,151,0.08)]">
                     <button

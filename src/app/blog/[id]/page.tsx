@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Sparkles, Calendar, Tag } from "lucide-react";
 import { getCachedDb } from "@/lib/db";
+import { getImageUrl } from "@/lib/utils";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -95,7 +96,7 @@ export default async function BlogPostDetailPage({ params }: BlogPostPageProps) 
         {/* Featured Cover Image */}
         <div className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden border border-[rgba(217,187,151,0.08)] bg-neutral-900 mb-12 shadow-2xl">
           <Image
-            src={post.image || "/brand_identity_mockup.png"}
+            src={getImageUrl(post.image) || "/brand_identity_mockup.png"}
             alt={post.title}
             fill
             sizes="(max-width: 1200px) 100vw, 1200px"
