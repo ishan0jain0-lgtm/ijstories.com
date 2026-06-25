@@ -285,9 +285,11 @@ export default function Home() {
             <Carousel 
               slides={showcaseItems.map((item) => ({
                 title: item.title,
+                tag: item.tag,
                 button: "Explore Project",
                 src: getImageUrl(item.image),
-                href: `/portfolio/${item.id}`
+                href: `/portfolio/${item.id}`,
+                aspectRatio: item.aspectRatio || "4:3"
               }))} 
             />
           </div>

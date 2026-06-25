@@ -41,6 +41,11 @@ export const metadata: Metadata = {
     "Marketing & Launch Campaigns",
   ],
   authors: [{ name: "I.J_Stories" }],
+  icons: {
+    icon: "/logo.jpg",
+    shortcut: "/logo.jpg",
+    apple: "/logo.jpg",
+  },
   openGraph: {
     title: "I.J_Stories | Multidisciplinary Creative Studio",
     description: "Building modern brands that feel human through design, storytelling, strategy, and media.",

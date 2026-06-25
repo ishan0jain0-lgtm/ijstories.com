@@ -16,6 +16,7 @@ interface PortfolioItem {
   images: string[];
   width?: number;
   height?: number;
+  aspectRatio?: string;
 }
 
 export default function PortfolioClient({
@@ -92,7 +93,7 @@ export default function PortfolioClient({
                   <div 
                     className="gallery-image-wrapper"
                     style={{
-                      aspectRatio: (() => {
+                      aspectRatio: item.aspectRatio ? item.aspectRatio.replace(":", " / ") : (() => {
                         if (!item.width || !item.height) return "4 / 5";
                         const ratio = item.width / item.height;
                         if (ratio < 0.7) return "0.7 / 1";

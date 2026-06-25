@@ -49,8 +49,9 @@ interface ShowcaseItem {
   image: string;
   link: string;
   images: string[];
-  width?: number;
-  height?: number;
+  width: number;
+  height: number;
+  aspectRatio?: string;
 }
 
 interface Lead {
@@ -179,7 +180,7 @@ export default function AdminDashboard() {
   // Form Fields
   const [teamForm, setTeamForm] = useState({ name: "", role: "", image: "" });
   const [blogForm, setBlogForm] = useState({ id: "", tag: "", title: "", snippet: "", content: "", quote: "", timestamp: "", image: "" });
-  const [showcaseForm, setShowcaseForm] = useState<{ id: string; tag: string; title: string; image: string; link: string; images: string[]; width: number; height: number }>({
+  const [showcaseForm, setShowcaseForm] = useState<{ id: string; tag: string; title: string; image: string; link: string; images: string[]; width: number; height: number; aspectRatio: string }>({
     id: "",
     tag: "",
     title: "",
@@ -187,7 +188,8 @@ export default function AdminDashboard() {
     link: "",
     images: [],
     width: 800,
-    height: 600
+    height: 600,
+    aspectRatio: "4:3"
   });
 
   const [settingsForm, setSettingsForm] = useState<WebsiteDetails>({
@@ -425,11 +427,12 @@ export default function AdminDashboard() {
         link: db.showcaseItems[index].link,
         images: nextImages,
         width: db.showcaseItems[index].width || 800,
-        height: db.showcaseItems[index].height || 600
+        height: db.showcaseItems[index].height || 600,
+        aspectRatio: db.showcaseItems[index].aspectRatio || "4:3"
       });
     } else {
       setSelectedShowcaseTags([]);
-      setShowcaseForm({ id: "showcase-" + (db.showcaseItems.length + 1), tag: "", title: "", image: "", link: "#", images: [], width: 800, height: 600 });
+      setShowcaseForm({ id: "showcase-" + (db.showcaseItems.length + 1), tag: "", title: "", image: "", link: "#", images: [], width: 800, height: 600, aspectRatio: "4:3" });
     }
   };
 
@@ -2101,9 +2104,42 @@ export default function AdminDashboard() {
                     )}
                   </div>
 
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Cover Aspect Ratio / Dimension</label>
+                    <select
+                      value={showcaseForm.aspectRatio || "4:3"}
+                      onChange={(e) => {
+                        const ratio = e.target.value;
+                        let w = 800;
+                        let h = 600;
+                        if (ratio === "1:1") { w = 800; h = 800; }
+                        else if (ratio === "16:9") { w = 800; h = 450; }
+                        else if (ratio === "4:3") { w = 800; h = 600; }
+                        else if (ratio === "9:16") { w = 450; h = 800; }
+                        else if (ratio === "3:4") { w = 600; h = 800; }
+                        else if (ratio === "21:9") { w = 800; h = 343; }
+                        
+                        setShowcaseForm({
+                          ...showcaseForm,
+                          aspectRatio: ratio,
+                          width: w,
+                          height: h
+                        });
+                      }}
+                      className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-[#121111] text-white text-sm focus:border-[#b34a26] focus:outline-none"
+                    >
+                      <option value="16:9">Landscape (16:9) - Video/Widescreen</option>
+                      <option value="4:3">Landscape (4:3) - Standard Photography</option>
+                      <option value="1:1">Square (1:1) - Grid Post</option>
+                      <option value="3:4">Portrait (3:4) - Classic Editorial</option>
+                      <option value="9:16">Portrait (9:16) - Vertical/Mobile</option>
+                      <option value="21:9">Cinematic (21:9) - Ultra-wide</option>
+                    </select>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Cover Width (px)</label>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Cover Width (px) [Auto-calculated]</label>
                       <input
                         type="number"
                         required
@@ -2114,7 +2150,7 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Cover Height (px)</label>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Cover Height (px) [Auto-calculated]</label>
                       <input
                         type="number"
                         required

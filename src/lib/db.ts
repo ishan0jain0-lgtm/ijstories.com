@@ -59,6 +59,7 @@ export interface ShowcaseItem {
   images: string[];
   width?: number;
   height?: number;
+  aspectRatio?: string;
 }
 
 export interface Lead {
@@ -148,7 +149,8 @@ const defaultShowcaseItems: ShowcaseItem[] = [
     link: "#",
     images: [],
     width: 800,
-    height: 600
+    height: 600,
+    aspectRatio: "4:3"
   },
   {
     id: "showcase-2",
@@ -158,7 +160,8 @@ const defaultShowcaseItems: ShowcaseItem[] = [
     link: "#",
     images: [],
     width: 600,
-    height: 800
+    height: 800,
+    aspectRatio: "3:4"
   }
 ];
 
@@ -214,7 +217,8 @@ const ShowcaseItemSchema = new Schema({
   link: { type: String, required: true },
   images: { type: [String], default: [] },
   width: { type: Number, default: 800 },
-  height: { type: Number, default: 600 }
+  height: { type: Number, default: 600 },
+  aspectRatio: { type: String, default: "4:3" }
 });
 
 const LeadSchema = new Schema({
@@ -265,7 +269,17 @@ export async function getDb(): Promise<DatabaseSchema> {
         timestamp: n.timestamp || new Date().toISOString(),
         image: n.image || ""
       })),
-      showcaseItems: showcaseItems.map((s: any) => ({ id: s.id, tag: s.tag, title: s.title, image: s.image, link: s.link, images: s.images || [], width: s.width || 800, height: s.height || 600 })),
+      showcaseItems: showcaseItems.map((s: any) => ({
+        id: s.id,
+        tag: s.tag,
+        title: s.title,
+        image: s.image,
+        link: s.link,
+        images: s.images || [],
+        width: s.width || 800,
+        height: s.height || 600,
+        aspectRatio: s.aspectRatio || "4:3"
+      })),
       leads: leads.map((l: any) => ({ id: l.id, name: l.name, email: l.email, interest: l.interest, message: l.message, timestamp: l.timestamp })),
       websiteDetails,
       isFallback: false
