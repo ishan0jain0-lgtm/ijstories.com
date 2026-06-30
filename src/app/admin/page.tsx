@@ -1288,10 +1288,15 @@ export default function AdminDashboard() {
                       </pre>
                     </div>
                   ) : (
-                    <div className="p-3.5 rounded-xl border border-emerald-950 bg-emerald-950/10 text-emerald-400 text-xs flex items-center justify-between">
+                    <div className="p-3.5 rounded-xl border border-emerald-950 bg-emerald-950/10 text-emerald-400 text-xs flex items-center justify-between flex-wrap gap-4">
                       <div className="flex items-center gap-3">
                         <CheckCircle size={16} /> 
-                        <span>ImageKit integration is active. Connected folder: <code className="font-mono bg-black/30 px-1.5 py-0.5 rounded text-emerald-300">/ijstories_uploads/</code></span>
+                        <div className="flex flex-col gap-1.5">
+                          <span>ImageKit integration is active. Connected folder: <code className="font-mono bg-black/30 px-1.5 py-0.5 rounded text-emerald-300">/ijstories_uploads/</code></span>
+                          <span className="text-[10.5px] font-medium text-emerald-400/80">
+                            Available space: {Math.max(0, 20480 - (mediaFiles.reduce((acc, file) => acc + (file.size || 0), 0) / (1024 * 1024))).toFixed(2)} MB remaining (20GB Free Plan)
+                          </span>
+                        </div>
                       </div>
                       <button
                         onClick={loadMediaFiles}

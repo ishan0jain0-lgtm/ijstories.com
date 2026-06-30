@@ -3,6 +3,7 @@ import { Roboto, Roboto_Condensed, Roboto_Serif } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import ImageKitProviderWrapper from "@/components/ImageKitProviderWrapper";
+import WhatsAppWidget from "@/components/WhatsAppWidget";
 
 const roboto = Roboto({
   variable: "--font-sans",
@@ -70,6 +71,7 @@ export default function RootLayout({
       <body className="antialiased" suppressHydrationWarning>
         <ImageKitProviderWrapper>
           {children}
+          <WhatsAppWidget />
         </ImageKitProviderWrapper>
       </body>
     </html>
