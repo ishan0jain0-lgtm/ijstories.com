@@ -72,6 +72,9 @@ interface WebsiteDetails {
   phone?: string;
   whatsapp?: string;
   youtube?: string;
+  whatsappPhone?: string;
+  whatsappTitle?: string;
+  whatsappGreeting?: string;
 }
 
 const QueueItemPreview = ({ file }: { file: File }) => {
@@ -1704,6 +1707,41 @@ export default function AdminDashboard() {
                               onChange={(e) => setSettingsForm({ ...settingsForm, whatsapp: e.target.value })}
                               placeholder="https://api.whatsapp.com/send/?phone=..."
                               className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none font-mono"
+                            />
+                          </div>
+                        </div>
+
+                        <h3 className="text-sm font-bold text-white border-b border-[rgba(217,187,151,0.08)] pb-2 pt-4">WhatsApp Widget Settings</h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Widget Phone (No '+')</label>
+                            <input
+                              type="text"
+                              value={settingsForm.whatsappPhone || ""}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, whatsappPhone: e.target.value })}
+                              placeholder="919311343359"
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Widget Title</label>
+                            <input
+                              type="text"
+                              value={settingsForm.whatsappTitle || ""}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, whatsappTitle: e.target.value })}
+                              placeholder="ij_stories"
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-[rgba(217,187,151,0.6)]">Widget Greeting</label>
+                            <input
+                              type="text"
+                              value={settingsForm.whatsappGreeting || ""}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, whatsappGreeting: e.target.value })}
+                              placeholder="Welcome to our custom chat! How may we assist you?"
+                              className="w-full p-2.5 rounded-lg border border-[rgba(217,187,151,0.1)] bg-black/40 text-white text-sm focus:border-[#b34a26] focus:outline-none"
                             />
                           </div>
                         </div>

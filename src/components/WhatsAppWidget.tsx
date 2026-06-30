@@ -1,32 +1,22 @@
-"use client";
-
 import Script from "next/script";
-import { useEffect } from "react";
+import { getCachedDb } from "@/lib/db";
 
-export default function WhatsAppWidget() {
-  useEffect(() => {
-    (window as any).whatsappWidgetConfig = {
-      phoneNumber: "+919311343359",
-      welcomeMessage: "Welcome to our custom chat! How may we assist you?",
-      companyName: "ij_stories",
-      agentName: "Lisa",
-      closedMessage: "We are currently offline. Please leave a message.",
-      customResponse: "This is a custom response message. Would you like to continue on WhatsApp?",
-      position: "right",
-    };
-  }, []);
+export default async function WhatsAppWidget() {
+  const db = await getCachedDb();
+  const config = db.websiteDetails;
+
+  // Only render if a phone number is configured
+  if (!config.whatsappPhone) return null;
 
   return (
-    <>
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/1dev-hridoy/whatsapp-widget-chat-box-library@latest/src/whatsapp-widget.min.css"
-      />
-      <div id="whatsapp-widget-container"></div>
-      <Script
-        src="https://cdn.jsdelivr.net/gh/1dev-hridoy/whatsapp-widget-chat-box-library@latest/src/whatsapp-widget.js"
-        strategy="lazyOnload"
-      />
-    </>
+    <Script
+      src="https://cdn.jsdelivr.net/gh/xsukax/whatsapp-widget@latest/xsukax-whatsapp-widget.js"
+      strategy="lazyOnload"
+      data-phone={config.whatsappPhone}
+      data-title={config.whatsappTitle || "ij_stories"}
+      data-greeting={config.whatsappGreeting || "Welcome to our custom chat! How may we assist you?"}
+      data-position="right"
+      data-button-color="#b34a26"
+    />
   );
 }

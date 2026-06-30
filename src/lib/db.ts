@@ -81,6 +81,9 @@ export interface WebsiteDetails {
   phone?: string;
   whatsapp?: string;
   youtube?: string;
+  whatsappPhone?: string;
+  whatsappTitle?: string;
+  whatsappGreeting?: string;
 }
 
 export interface DatabaseSchema {
@@ -174,7 +177,10 @@ const defaultWebsiteDetails: WebsiteDetails = {
   behance: "https://behance.net",
   phone: "+91 93113 43359",
   whatsapp: "https://api.whatsapp.com/send/?phone=919311343359&text&type=phone_number&app_absent=0",
-  youtube: "https://www.youtube.com/@I.jstories"
+  youtube: "https://www.youtube.com/@I.jstories",
+  whatsappPhone: "919311343359",
+  whatsappTitle: "ij_stories",
+  whatsappGreeting: "Welcome to our custom chat! How may we assist you?"
 };
 
 // Mongoose Schemas
@@ -187,7 +193,10 @@ const WebsiteDetailsSchema = new Schema({
   behance: { type: String, required: true },
   phone: { type: String, default: "" },
   whatsapp: { type: String, default: "" },
-  youtube: { type: String, default: "" }
+  youtube: { type: String, default: "" },
+  whatsappPhone: { type: String, default: "" },
+  whatsappTitle: { type: String, default: "" },
+  whatsappGreeting: { type: String, default: "" }
 });
 
 export const WebsiteDetailsModel = models.WebsiteDetails || model("WebsiteDetails", WebsiteDetailsSchema);
@@ -254,7 +263,10 @@ export async function getDb(): Promise<DatabaseSchema> {
       behance: (websiteDetailsDoc as any).behance || defaultWebsiteDetails.behance,
       phone: (websiteDetailsDoc as any).phone || defaultWebsiteDetails.phone || "",
       whatsapp: (websiteDetailsDoc as any).whatsapp || defaultWebsiteDetails.whatsapp || "",
-      youtube: (websiteDetailsDoc as any).youtube || defaultWebsiteDetails.youtube || ""
+      youtube: (websiteDetailsDoc as any).youtube || defaultWebsiteDetails.youtube || "",
+      whatsappPhone: (websiteDetailsDoc as any).whatsappPhone || defaultWebsiteDetails.whatsappPhone || "",
+      whatsappTitle: (websiteDetailsDoc as any).whatsappTitle || defaultWebsiteDetails.whatsappTitle || "",
+      whatsappGreeting: (websiteDetailsDoc as any).whatsappGreeting || defaultWebsiteDetails.whatsappGreeting || ""
     } : defaultWebsiteDetails;
 
     return {
